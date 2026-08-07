@@ -4,46 +4,49 @@ import { Icon } from "@/components/icons";
 
 export function SiteFooter() {
   return (
-    <footer className="bg-[var(--color-navy-deep)] text-white/70">
-      <div className="mx-auto max-w-7xl px-5 md:px-8 py-12">
+    <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)]">
+      <div className="mx-auto max-w-[1200px] px-4 py-12 md:px-8">
         <div className="grid gap-8 md:grid-cols-2 md:items-start">
           <div>
             <Image
-              src="/logo-white.png"
-              alt="QBC Systems"
-              width={249}
-              height={120}
-              className="h-11 w-auto object-contain"
+              src="/logo.png"
+              alt="Clear Choice Home Cleaning Services"
+              width={569}
+              height={96}
+              className="h-10 w-auto object-contain"
             />
-            <p className="mt-4 font-display text-lg font-semibold text-white">{BRAND.tagline}</p>
+            <p className="mt-4 max-w-sm font-display text-lg font-bold text-[var(--color-ink)]">
+              {BRAND.tagline}
+            </p>
           </div>
 
-          <address className="not-italic md:text-right text-sm leading-relaxed space-y-1.5">
-            <p className="font-semibold text-white">QBC Systems, Inc.</p>
-            <p>{BRAND.address}</p>
-            <p>
+          <address className="not-italic text-[15px] leading-relaxed md:text-right">
+            <p className="font-semibold text-[var(--color-ink)]">{BRAND.company}</p>
+            <p className="mt-1">{BRAND.address}</p>
+            <p className="mt-1">Open {BRAND.hours}</p>
+            <p className="mt-2 md:flex md:justify-end">
               <a
                 href={PHONE_HREF}
-                className="inline-flex items-center gap-2 hover:text-white transition-colors md:justify-end"
-                aria-label={`Call QBC Systems at ${PHONE}`}
+                className="inline-flex items-center gap-2 font-semibold text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-hover)]"
+                aria-label={`Call Clear Choice at ${PHONE}`}
               >
-                <Icon name="phone" className="h-4 w-4 text-[var(--color-accent)]" strokeWidth={0} fill="currentColor" />
+                <Icon name="phone" className="h-4 w-4" strokeWidth={0} fill="currentColor" />
                 {PHONE}
               </a>
             </p>
-            <p>
-              <a href={BRAND.emailHref} className="hover:text-white transition-colors">
+            <p className="mt-1">
+              <a href={BRAND.emailHref} className="transition-colors hover:text-[var(--color-ink)]">
                 {BRAND.email}
               </a>
             </p>
           </address>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p>© {CURRENT_YEAR} QBC Systems, Inc. All rights reserved.</p>
-          <a href="/privacy" className="hover:text-white transition-colors">
-            Privacy Policy
-          </a>
+        <div className="mt-10 border-t border-[var(--color-border)] pt-6 text-[13px]">
+          <p>
+            © {CURRENT_YEAR} {BRAND.company}. All rights reserved. Veteran-owned and locally owned in
+            Alpharetta, GA.
+          </p>
         </div>
       </div>
     </footer>

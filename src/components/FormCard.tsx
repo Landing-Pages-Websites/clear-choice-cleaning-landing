@@ -5,9 +5,9 @@ import { useMegaLeadForm } from "@/hooks/useMegaLeadForm";
 import {
   CTA,
   PHONE,
-  TIRE_BRANDS,
-  REVENUE_OPTIONS,
-  EMPLOYEE_OPTIONS,
+  CLEANING_TYPES,
+  RATE_QUESTION_LABEL,
+  RATE_OPTIONS,
 } from "@/lib/content";
 import { Icon } from "@/components/icons";
 
@@ -20,92 +20,30 @@ declare global {
   }
 }
 
-// ─── Validation (HARD RULE #8 — inline per-field, no native tooltips) ───
-
-// RFC-5322-lite — the lead API server-validates the rest.
-const EMAIL_RE = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/;
-
-// NANP: area code & exchange each start 2-9 and may not be an N11.
-const NANP_RE = /^[2-9](?!11)\d{2}[2-9](?!11)\d{2}\d{4}$/;
-
-// Only these fields block submission. companyWebsite + primaryTireBrand are
-// optional. annualRevenue "Under $2M" and employeeCount "Under 5" are
-// REPORTING-ONLY answers — required to be chosen, but never disqualifying.
-type FieldKey =
-  | "firstName"
-  | "lastName"
-  | "email"
-  | "phone"
-  | "annualRevenue"
-  | "employeeCount";
+// Email pattern also lives on the <input> so native validation enforces it.
+const EMAIL_PATTERN = "[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}";
+const PHONE_PATTERN = "\\(\\d{3}\\) \\d{3}-\\d{4}";
+const ZIP_PATTERN = "\\d{5}";
 
 interface FormState {
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
-  companyWebsite: string;
-  primaryTireBrand: string;
-  annualRevenue: string;
-  employeeCount: string;
+  zip_code: string;
+  cleaning_type: string;
+  rate_alignment: string;
 }
 
 const INITIAL: FormState = {
-  firstName: "",
-  lastName: "",
+  first_name: "",
+  last_name: "",
   email: "",
   phone: "",
-  companyWebsite: "",
-  primaryTireBrand: "",
-  annualRevenue: "",
-  employeeCount: "",
+  zip_code: "",
+  cleaning_type: "",
+  rate_alignment: "",
 };
-
-type FieldErrors = Partial<Record<FieldKey, string>>;
-
-const REQUIRED_ORDER: FieldKey[] = [
-  "firstName",
-  "lastName",
-  "email",
-  "phone",
-  "annualRevenue",
-  "employeeCount",
-];
-
-function validateField(key: FieldKey, value: string): string | undefined {
-  switch (key) {
-    case "firstName":
-      return value.trim() ? undefined : "First name is required.";
-    case "lastName":
-      return value.trim() ? undefined : "Last name is required.";
-    case "email": {
-      const v = value.trim();
-      if (!v) return "Email address is required.";
-      if (!EMAIL_RE.test(v)) return "Please enter a valid email address.";
-      return undefined;
-    }
-    case "phone": {
-      const digits = value.replace(/\D/g, "");
-      if (!digits) return "Phone number is required.";
-      if (digits.length !== 10) return "Please enter a valid 10-digit phone number.";
-      if (!NANP_RE.test(digits)) return "Please enter a valid US phone number.";
-      return undefined;
-    }
-    case "annualRevenue":
-      return value ? undefined : "Please select your annual revenue.";
-    case "employeeCount":
-      return value ? undefined : "Please select your team size.";
-  }
-}
-
-function validateAll(data: FormState): FieldErrors {
-  const errors: FieldErrors = {};
-  REQUIRED_ORDER.forEach((k) => {
-    const err = validateField(k, data[k]);
-    if (err) errors[k] = err;
-  });
-  return errors;
-}
 
 function formatPhone(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -117,7 +55,6 @@ function formatPhone(value: string): string {
 
 interface FormCardProps {
   idPrefix?: string;
-  eyebrow?: string;
   heading?: string;
   subheading?: string;
   submitLabel?: string;
@@ -127,432 +64,327 @@ interface FormCardProps {
 
 export function FormCard({
   idPrefix = "hero",
-  eyebrow = "Request your free demo",
-  heading = "See TireServ mapped to your operation",
-  subheading = "No cost, no commitment — every request gets a response within one business day.",
+  heading = "Get your free cleaning quote",
+  subheading = "Tell us the space and your date — we'll send a clear, no-obligation quote.",
   submitLabel = CTA.primary,
   routeSlug,
-  thankYouBody = "Thanks — your demo request is in. A member of the QBC Systems team will reach out within one business day to schedule a walkthrough built around your operation.",
+  thankYouBody = "Thanks — your quote request is in. Michael or the Clear Choice team will reach out to confirm the details and get you scheduled.",
 }: FormCardProps) {
   const { submit } = useMegaLeadForm();
-
   const [data, setData] = useState<FormState>(INITIAL);
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Synchronous re-entrancy guard — blocks duplicate fires from rapid clicks
-  // before React re-renders with the disabled state.
+  const formRef = useRef<HTMLFormElement>(null);
+  // Synchronous re-entrancy latch — a rapid click burst yields exactly ONE fire.
   const inFlightRef = useRef(false);
-  const fieldRefs = useRef<Partial<Record<FieldKey, HTMLElement | null>>>({});
 
-  const update = (k: keyof FormState, v: string) => {
+  const update = (k: keyof FormState, v: string) =>
     setData((d) => ({ ...d, [k]: v }));
-    setErrors((prev) => {
-      if (!(k in prev)) return prev;
-      const key = k as FieldKey;
-      if (!prev[key]) return prev;
-      const err = validateField(key, v);
-      if (err) return prev;
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
-  };
 
-  const markTouched = (k: FieldKey, currentValue: string) => {
-    setTouched((t) => ({ ...t, [k]: true }));
-    const err = validateField(k, currentValue);
-    setErrors((prev) => {
-      const next = { ...prev };
-      if (err) next[k] = err;
-      else delete next[k];
-      return next;
-    });
-  };
-
-  const fireTracking = () => {
+  const fireTracking = (qualified: boolean) => {
     if (typeof window === "undefined") return;
-    const route =
-      routeSlug || (typeof window !== "undefined" ? window.location.pathname : "/");
-    // Mega optimizer event FIRST, then the GTM dataLayer signal.
-    window.MegaTag?.trackEvent?.("form_submit", { form_route: route });
+    const route = routeSlug || window.location.pathname;
+    const payload = { form_route: route, qualified };
+    // Mega optimizer event FIRST, then the GTM dataLayer signal — for ALL submits.
+    window.MegaTag?.trackEvent?.("form_submit", payload);
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event: "form_submit", form_route: route });
+    window.dataLayer.push({ event: "form_submit", ...payload });
+    // Conversion signal only fires for qualified leads.
+    if (qualified) {
+      window.MegaTag?.trackEvent?.("qualified_lead", payload);
+      window.dataLayer.push({ event: "qualified_lead", ...payload });
+    }
   };
 
-  // Validate FIRST, then submit. Button is type="button" so the optimizer's
-  // capture-phase listener never fires on empty/invalid clicks.
-  const handleValidateAndSubmit = async () => {
-    if (inFlightRef.current || submitting || submitted) return;
-    const allErrors = validateAll(data);
-    if (Object.keys(allErrors).length > 0) {
-      setErrors(allErrors);
-      setTouched({
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        annualRevenue: true,
-        employeeCount: true,
-      });
-      const firstBad = REQUIRED_ORDER.find((k) => allErrors[k]);
-      if (firstBad) {
-        const el = fieldRefs.current[firstBad];
-        try {
-          (el as HTMLElement | null)?.focus({ preventScroll: false });
-        } catch {
-          el?.focus();
-        }
-      }
-      return;
-    }
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (inFlightRef.current || submitted) return;
     inFlightRef.current = true;
     setSubmitting(true);
-    // Reporting qualification (does NOT block submit — every lead is delivered).
-    const revenueDQ = data.annualRevenue === "Under $2M";
-    const employeesDQ = data.employeeCount === "Under 5";
-    const qualified = !(revenueDQ || employeesDQ);
-    const disqualification_reason = revenueDQ && employeesDQ
-      ? "revenue_and_headcount_below_threshold"
-      : revenueDQ
-        ? "revenue_under_2m"
-        : employeesDQ
-          ? "employees_under_5"
-          : null;
+    const qualified = data.rate_alignment !== "No";
     try {
       await submit({
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
+        first_name: data.first_name.trim(),
+        last_name: data.last_name.trim(),
         email: data.email.trim(),
         phone: data.phone.replace(/\D/g, ""),
-        companyWebsite: data.companyWebsite.trim(),
-        primaryTireBrand: data.primaryTireBrand,
-        annualRevenue: data.annualRevenue,
-        employeeCount: data.employeeCount,
+        zip_code: data.zip_code.trim(),
+        cleaning_type: data.cleaning_type,
+        rate_alignment: data.rate_alignment,
         qualified,
-        disqualification_reason,
-        route_slug:
-          routeSlug ||
-          (typeof window !== "undefined" ? window.location.pathname : "/"),
+        route_slug: routeSlug || (typeof window !== "undefined" ? window.location.pathname : "/"),
       });
-      fireTracking();
+      fireTracking(qualified);
       setSubmitted(true);
-    } catch (err) {
-      console.error("Form submission error:", err);
-      // Still fire tracking + show thank-you so the user isn't stranded.
-      fireTracking();
+    } catch {
+      // Never strand the user — still show the thank-you + fire tracking.
+      fireTracking(qualified);
       setSubmitted(true);
     } finally {
+      inFlightRef.current = false;
       setSubmitting(false);
     }
   };
 
-  const handleNativeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Validate FIRST (native), then submit. Button is type="button" so the
+  // optimizer's capture-phase listener never fires on an empty/invalid click.
+  const handleValidateAndSubmit = () => {
+    const form = formRef.current;
+    if (!form) return;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    form.requestSubmit();
   };
-
-  const cardBase =
-    "bg-white border border-[var(--color-border)] shadow-card-lg";
 
   if (submitted) {
     return (
-      <div className={`${cardBase} rounded-2xl p-8 md:p-10`}>
+      <div className="rounded-2xl bg-white border border-[var(--color-border)] shadow-card-lg p-8 md:p-10">
         <div className="flex flex-col items-center text-center gap-4">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[var(--color-primary)]/10">
-            <Icon name="check" className="w-7 h-7 text-[var(--color-primary)]" strokeWidth={2.4} />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)]/10">
+            <Icon name="check" className="h-7 w-7 text-[var(--color-primary)]" strokeWidth={2.4} />
           </div>
-          <h3 className="font-display text-2xl md:text-3xl text-[var(--color-text)]">
-            Demo request received.
-          </h3>
-          <p className="text-[var(--color-muted)] text-base leading-relaxed">
-            {thankYouBody}
-          </p>
-          <p className="text-[var(--color-muted)] text-sm">
+          <h3 className="t-h3 text-[var(--color-ink)]">Quote request received.</h3>
+          <p className="text-[var(--color-muted)] leading-relaxed">{thankYouBody}</p>
+          <p className="text-[var(--color-muted)]">
             Prefer to talk now? Call{" "}
-            <span className="font-semibold text-[var(--color-text)] whitespace-nowrap">
-              {PHONE}
-            </span>
-            .
+            <span className="font-semibold text-[var(--color-ink)] whitespace-nowrap">{PHONE}</span>.
           </p>
         </div>
       </div>
     );
   }
 
-  const showErr = (k: FieldKey) => Boolean(touched[k] && errors[k]);
-  const errId = (k: FieldKey) => `${idPrefix}-${k}-error`;
-  const fieldCls =
-    "w-full rounded-lg px-3.5 py-2.5 text-sm bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-muted-soft)] transition-colors focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-accent)]/40";
-  const inputCls = (k: FieldKey) => `${fieldCls} ${showErr(k) ? "lp-input-error" : ""}`;
-
   return (
     <form
-      onSubmit={handleNativeSubmit}
-      noValidate
-      aria-label="Request a free TireServ demo"
-      className={`${cardBase} rounded-2xl p-6 md:p-7 space-y-3.5`}
+      ref={formRef}
+      onSubmit={onSubmit}
+      aria-label="Request a free cleaning quote"
+      className="rounded-2xl bg-white border border-[var(--color-border)] shadow-card-lg p-6 md:p-7 space-y-3.5"
     >
-      <div className="space-y-1 mb-1">
-        <p className="eyebrow">{eyebrow}</p>
-        <h3 className="font-display text-xl md:text-[1.6rem] leading-tight text-[var(--color-text)]">
-          {heading}
-        </h3>
-        <p className="text-sm text-[var(--color-muted)] leading-snug">{subheading}</p>
+      <div className="space-y-1.5">
+        <h3 className="t-h3 text-[var(--color-ink)] leading-tight">{heading}</h3>
+        <p className="text-[15px] text-[var(--color-muted)] leading-snug">{subheading}</p>
       </div>
 
-      {/* First / Last */}
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor={`${idPrefix}-firstName`} className="sr-only">First name</label>
-          <input
-            ref={(el) => { fieldRefs.current.firstName = el; }}
-            id={`${idPrefix}-firstName`}
-            name="firstName"
-            type="text"
-            required
-            autoComplete="given-name"
-            placeholder="First name"
-            value={data.firstName}
-            onChange={(e) => update("firstName", e.target.value)}
-            onBlur={(e) => markTouched("firstName", e.target.value)}
-            className={inputCls("firstName")}
-            aria-invalid={showErr("firstName") || undefined}
-            aria-describedby={showErr("firstName") ? errId("firstName") : undefined}
-            disabled={submitting}
-          />
-          {showErr("firstName") && (
-            <p id={errId("firstName")} role="alert" aria-live="polite" className="lp-field-error">
-              {errors.firstName}
-            </p>
-          )}
-        </div>
-        <div>
-          <label htmlFor={`${idPrefix}-lastName`} className="sr-only">Last name</label>
-          <input
-            ref={(el) => { fieldRefs.current.lastName = el; }}
-            id={`${idPrefix}-lastName`}
-            name="lastName"
-            type="text"
-            required
-            autoComplete="family-name"
-            placeholder="Last name"
-            value={data.lastName}
-            onChange={(e) => update("lastName", e.target.value)}
-            onBlur={(e) => markTouched("lastName", e.target.value)}
-            className={inputCls("lastName")}
-            aria-invalid={showErr("lastName") || undefined}
-            aria-describedby={showErr("lastName") ? errId("lastName") : undefined}
-            disabled={submitting}
-          />
-          {showErr("lastName") && (
-            <p id={errId("lastName")} role="alert" aria-live="polite" className="lp-field-error">
-              {errors.lastName}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Email */}
-      <div>
-        <label htmlFor={`${idPrefix}-email`} className="sr-only">Work email</label>
-        <input
-          ref={(el) => { fieldRefs.current.email = el; }}
-          id={`${idPrefix}-email`}
-          name="email"
-          type="email"
-          required
-          pattern="[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}"
-          autoComplete="email"
-          placeholder="Work email"
-          value={data.email}
-          onChange={(e) => update("email", e.target.value)}
-          onBlur={(e) => markTouched("email", e.target.value)}
-          className={inputCls("email")}
-          aria-invalid={showErr("email") || undefined}
-          aria-describedby={showErr("email") ? errId("email") : undefined}
+        <Field
+          id={`${idPrefix}-first_name`}
+          name="first_name"
+          label="First Name"
+          autoComplete="given-name"
+          value={data.first_name}
+          onChange={(v) => update("first_name", v)}
           disabled={submitting}
         />
-        {showErr("email") && (
-          <p id={errId("email")} role="alert" aria-live="polite" className="lp-field-error">
-            {errors.email}
-          </p>
-        )}
-      </div>
-
-      {/* Phone */}
-      <div>
-        <label htmlFor={`${idPrefix}-phone`} className="sr-only">Phone</label>
-        <input
-          ref={(el) => { fieldRefs.current.phone = el; }}
-          id={`${idPrefix}-phone`}
-          name="phone"
-          type="tel"
-          required
-          inputMode="numeric"
-          autoComplete="tel"
-          placeholder="Phone (10 digits)"
-          value={data.phone}
-          onChange={(e) => update("phone", formatPhone(e.target.value))}
-          onBlur={(e) => markTouched("phone", e.target.value)}
-          className={inputCls("phone")}
-          aria-invalid={showErr("phone") || undefined}
-          aria-describedby={showErr("phone") ? errId("phone") : undefined}
-          disabled={submitting}
-        />
-        {showErr("phone") && (
-          <p id={errId("phone")} role="alert" aria-live="polite" className="lp-field-error">
-            {errors.phone}
-          </p>
-        )}
-      </div>
-
-      {/* Company website (optional) */}
-      <div>
-        <label htmlFor={`${idPrefix}-companyWebsite`} className="sr-only">
-          Company website (optional)
-        </label>
-        <input
-          id={`${idPrefix}-companyWebsite`}
-          name="companyWebsite"
-          type="text"
-          autoComplete="url"
-          placeholder="Company website (optional)"
-          value={data.companyWebsite}
-          onChange={(e) => update("companyWebsite", e.target.value)}
-          className={fieldCls}
+        <Field
+          id={`${idPrefix}-last_name`}
+          name="last_name"
+          label="Last Name"
+          autoComplete="family-name"
+          value={data.last_name}
+          onChange={(v) => update("last_name", v)}
           disabled={submitting}
         />
       </div>
 
-      {/* Primary tire brand (optional) */}
-      <div className="relative">
-        <label htmlFor={`${idPrefix}-primaryTireBrand`} className="sr-only">
-          Primary tire brand (optional)
-        </label>
-        <select
-          id={`${idPrefix}-primaryTireBrand`}
-          name="primaryTireBrand"
-          value={data.primaryTireBrand}
-          onChange={(e) => update("primaryTireBrand", e.target.value)}
-          className={`${fieldCls} appearance-none pr-9 ${data.primaryTireBrand ? "" : "text-[var(--color-muted-soft)]"}`}
-          disabled={submitting}
-        >
-          <option value="">Primary tire brand (optional)</option>
-          {TIRE_BRANDS.map((b) => (
-            <option key={b} value={b} className="text-[var(--color-text)]">
-              {b}
-            </option>
-          ))}
-        </select>
-        <ChevronDown />
-      </div>
+      <Field
+        id={`${idPrefix}-email`}
+        name="email"
+        label="Email Address"
+        type="email"
+        pattern={EMAIL_PATTERN}
+        autoComplete="email"
+        value={data.email}
+        onChange={(v) => update("email", v)}
+        disabled={submitting}
+      />
 
-      {/* Qualifier note */}
-      <p className="text-xs text-[var(--color-muted)] leading-snug pt-0.5">
-        Two quick questions help us tailor the demo — every request gets a response
-        regardless of your answers.
-      </p>
+      <Field
+        id={`${idPrefix}-phone`}
+        name="phone"
+        label="Phone Number"
+        type="tel"
+        inputMode="numeric"
+        pattern={PHONE_PATTERN}
+        autoComplete="tel"
+        placeholder="(555) 555-5555"
+        value={data.phone}
+        onChange={(v) => update("phone", formatPhone(v))}
+        disabled={submitting}
+      />
 
-      {/* Annual revenue / Employee count */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor={`${idPrefix}-annualRevenue`} className="sr-only">Annual revenue</label>
-          <div className="relative">
-            <select
-              ref={(el) => { fieldRefs.current.annualRevenue = el; }}
-              id={`${idPrefix}-annualRevenue`}
-              name="annualRevenue"
-              required
-              value={data.annualRevenue}
-              onChange={(e) => {
-                update("annualRevenue", e.target.value);
-                markTouched("annualRevenue", e.target.value);
-              }}
-              onBlur={(e) => markTouched("annualRevenue", e.target.value)}
-              className={`${inputCls("annualRevenue")} appearance-none pr-9 ${data.annualRevenue ? "" : "text-[var(--color-muted-soft)]"}`}
-              aria-invalid={showErr("annualRevenue") || undefined}
-              aria-describedby={showErr("annualRevenue") ? errId("annualRevenue") : undefined}
-              disabled={submitting}
-            >
-              <option value="">Annual revenue</option>
-              {REVENUE_OPTIONS.map((o) => (
-                <option key={o} value={o} className="text-[var(--color-text)]">{o}</option>
-              ))}
-            </select>
-            <ChevronDown />
-          </div>
-          {showErr("annualRevenue") && (
-            <p id={errId("annualRevenue")} role="alert" aria-live="polite" className="lp-field-error">
-              {errors.annualRevenue}
-            </p>
-          )}
-        </div>
-        <div>
-          <label htmlFor={`${idPrefix}-employeeCount`} className="sr-only">Team size</label>
-          <div className="relative">
-            <select
-              ref={(el) => { fieldRefs.current.employeeCount = el; }}
-              id={`${idPrefix}-employeeCount`}
-              name="employeeCount"
-              required
-              value={data.employeeCount}
-              onChange={(e) => {
-                update("employeeCount", e.target.value);
-                markTouched("employeeCount", e.target.value);
-              }}
-              onBlur={(e) => markTouched("employeeCount", e.target.value)}
-              className={`${inputCls("employeeCount")} appearance-none pr-9 ${data.employeeCount ? "" : "text-[var(--color-muted-soft)]"}`}
-              aria-invalid={showErr("employeeCount") || undefined}
-              aria-describedby={showErr("employeeCount") ? errId("employeeCount") : undefined}
-              disabled={submitting}
-            >
-              <option value="">Team size</option>
-              {EMPLOYEE_OPTIONS.map((o) => (
-                <option key={o} value={o} className="text-[var(--color-text)]">{o}</option>
-              ))}
-            </select>
-            <ChevronDown />
-          </div>
-          {showErr("employeeCount") && (
-            <p id={errId("employeeCount")} role="alert" aria-live="polite" className="lp-field-error">
-              {errors.employeeCount}
-            </p>
-          )}
-        </div>
-      </div>
+      <Field
+        id={`${idPrefix}-zip_code`}
+        name="zip_code"
+        label="ZIP Code"
+        inputMode="numeric"
+        pattern={ZIP_PATTERN}
+        maxLength={5}
+        autoComplete="postal-code"
+        placeholder="30004"
+        value={data.zip_code}
+        onChange={(v) => update("zip_code", v.replace(/\D/g, "").slice(0, 5))}
+        disabled={submitting}
+      />
+
+      <SelectField
+        id={`${idPrefix}-cleaning_type`}
+        name="cleaning_type"
+        label="What type of cleaning are you looking for?"
+        placeholder="Select a service"
+        options={CLEANING_TYPES}
+        value={data.cleaning_type}
+        onChange={(v) => update("cleaning_type", v)}
+        disabled={submitting}
+      />
+
+      <SelectField
+        id={`${idPrefix}-rate_alignment`}
+        name="rate_alignment"
+        label={RATE_QUESTION_LABEL}
+        placeholder="Select one"
+        options={RATE_OPTIONS}
+        value={data.rate_alignment}
+        onChange={(v) => update("rate_alignment", v)}
+        disabled={submitting}
+      />
 
       <button
         type="button"
         onClick={handleValidateAndSubmit}
         disabled={submitting || submitted}
-        className="mt-1 w-full rounded-lg px-6 py-3.5 font-semibold text-base bg-[var(--color-primary)] text-white shadow-cta transition-all hover:bg-[var(--color-primary-hover)] hover:-translate-y-0.5 active:translate-y-0 active:bg-[var(--color-primary-active)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 disabled:bg-[var(--color-primary-disabled)] disabled:cursor-not-allowed disabled:translate-y-0 flex items-center justify-center gap-2"
+        className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-6 py-3.5 text-base font-bold text-white shadow-cta transition-all hover:-translate-y-0.5 hover:bg-[var(--color-accent-hover)] active:translate-y-0 active:bg-[var(--color-accent-active)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:translate-y-0"
       >
-        {submitting ? "Submitting…" : submitLabel}
-        {!submitting && <Icon name="arrow" className="w-4 h-4" strokeWidth={2.4} />}
+        {submitting ? "Sending…" : submitLabel}
+        {!submitting && <Icon name="arrow" className="h-4 w-4" strokeWidth={2.4} />}
       </button>
 
-      <p className="text-xs text-center leading-relaxed text-[var(--color-muted)]">
-        No spam. We&apos;ll only use your details to schedule your demo.
+      <p className="text-center text-[13px] leading-relaxed text-[var(--color-muted)]">
+        No spam — we only use your details to prepare your quote.
       </p>
     </form>
   );
 }
 
-function ChevronDown() {
+// ─── Field primitives ───
+
+const FIELD_CLS =
+  "w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3.5 py-3 text-base text-[var(--color-ink)] placeholder:text-[var(--color-muted)] transition-colors focus:border-[var(--color-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)]/40";
+
+interface FieldProps {
+  id: string;
+  name: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  type?: string;
+  inputMode?: "numeric" | "text";
+  pattern?: string;
+  maxLength?: number;
+  placeholder?: string;
+  autoComplete?: string;
+}
+
+function Field({
+  id,
+  name,
+  label,
+  value,
+  onChange,
+  disabled,
+  type = "text",
+  inputMode,
+  pattern,
+  maxLength,
+  placeholder,
+  autoComplete,
+}: FieldProps) {
   return (
-    <svg
-      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
+    <div>
+      <label htmlFor={id} className="mb-1 block text-[13px] font-semibold text-[var(--color-ink)]">
+        {label}
+      </label>
+      <input
+        id={id}
+        name={name}
+        type={type}
+        required
+        inputMode={inputMode}
+        pattern={pattern}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={FIELD_CLS}
+        disabled={disabled}
+      />
+    </div>
+  );
+}
+
+interface SelectFieldProps {
+  id: string;
+  name: string;
+  label: string;
+  placeholder: string;
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}
+
+function SelectField({
+  id,
+  name,
+  label,
+  placeholder,
+  options,
+  value,
+  onChange,
+  disabled,
+}: SelectFieldProps) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1 block text-[13px] font-semibold text-[var(--color-ink)]">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          id={id}
+          name={name}
+          required
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${FIELD_CLS} appearance-none pr-9 ${value ? "" : "text-[var(--color-muted)]"}`}
+          disabled={disabled}
+        >
+          <option value="" disabled>
+            {placeholder}
+          </option>
+          {options.map((o) => (
+            <option key={o} value={o} className="text-[var(--color-ink)]">
+              {o}
+            </option>
+          ))}
+        </select>
+        <svg
+          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted)]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </div>
+    </div>
   );
 }

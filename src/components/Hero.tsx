@@ -8,76 +8,65 @@ import { HERO, PHONE, PHONE_HREF } from "@/lib/content";
 
 export function Hero() {
   return (
-    <section
-      id="hero"
-      className="relative isolate overflow-hidden bg-[var(--color-navy)] pt-20 md:pt-28 pb-12 md:pb-20"
-    >
-      {/* Background imagery + navy wash */}
-      <div className="absolute inset-0 -z-10">
+    <section id="hero" className="relative isolate overflow-hidden bg-[var(--color-ink)]">
+      {/* Decorative background: photo + left-weighted ink scrim (no negative z-index) */}
+      <div aria-hidden="true" className="absolute inset-0 z-0">
         <Image
-          src="/images/hero-warehouse.jpg"
+          src="/images/hero-living-room.jpg"
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center opacity-25"
+          className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-navy)] via-[var(--color-navy)]/95 to-[var(--color-navy-deep)]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-navy-deep)]/80 via-transparent to-transparent" />
-        <div className="absolute inset-0 tex-grid opacity-40" />
+        {/* Left-weighted scrim (~72% → 0%) on desktop; stronger overall on mobile for AA */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-ink)]/90 via-[var(--color-ink)]/70 to-[var(--color-ink)]/35 lg:from-[var(--color-ink)]/85 lg:via-[var(--color-ink)]/50 lg:to-transparent" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-5 md:px-8 grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        {/* Copy */}
-        <div className="lg:col-span-7">
-          <Reveal className="space-y-5 md:space-y-6">
-            <ul className="flex flex-wrap gap-2">
-              {HERO.chips.map((chip) => (
-                <li
-                  key={chip}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm"
-                >
-                  <Icon name="check" className="w-3.5 h-3.5 text-[var(--color-accent)]" strokeWidth={2.5} />
-                  {chip}
-                </li>
-              ))}
-            </ul>
+      <div className="relative z-10 mx-auto grid max-w-[1200px] gap-6 px-4 pb-12 pt-20 md:px-8 md:pb-20 md:pt-28 lg:grid-cols-2 lg:gap-x-12 lg:gap-y-6 lg:items-start">
+        {/* 1 — Headline (mobile: first; desktop: left/top) */}
+        <Reveal className="order-1 lg:col-start-1 lg:row-start-1">
+          <h1 className="t-h1 text-white">{HERO.h1}</h1>
+          <p className="mt-3 text-xl font-semibold text-[var(--color-secondary)] md:text-2xl">
+            {HERO.h1Tagline}
+          </p>
+        </Reveal>
 
-            <h1 className="font-display font-extrabold text-white leading-[1.05] tracking-[-0.02em] text-[2.15rem] sm:text-5xl lg:text-[3.9rem]">
-              {HERO.h1Lead && (
-                <span className="text-[var(--color-accent)]">{HERO.h1Lead}</span>
-              )}{" "}
-              <span className="bg-gradient-to-r from-[var(--color-accent)] to-[#5fd0ff] bg-clip-text text-transparent">
-                {HERO.h1Accent}
-              </span>
-            </h1>
-
-            <p className="max-w-xl text-base md:text-lg leading-relaxed text-white/80">
-              {HERO.subhead}
-            </p>
-
-            <div className="flex flex-wrap items-center gap-4 pt-1">
-              <a
-                href={PHONE_HREF}
-                className="inline-flex items-center gap-2 text-white font-semibold hover:text-[var(--color-accent)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded-md px-1"
-                aria-label={`Call QBC Systems at ${PHONE}`}
-              >
-                <Icon name="phone" className="w-5 h-5 text-[var(--color-accent)]" strokeWidth={0} fill="currentColor" />
-                <span>
-                  <span className="text-white/60 font-normal text-sm mr-1.5">Prefer to talk?</span>
-                  {PHONE}
-                </span>
-              </a>
-            </div>
-          </Reveal>
-        </div>
-
-        {/* Form */}
-        <div id="demo" className="lg:col-span-5 scroll-mt-24">
-          <Reveal delay={120}>
+        {/* 2 — Form (mobile: second, above the fold; desktop: right column) */}
+        <div className="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+          <Reveal delay={80}>
             <FormCard idPrefix="hero" />
           </Reveal>
         </div>
+
+        {/* 3 — Supporting copy, chips, tap-to-call (mobile: below form) */}
+        <Reveal delay={140} className="order-3 lg:col-start-1 lg:row-start-2">
+          <p className="max-w-xl text-[17px] leading-relaxed text-white/85">{HERO.subhead}</p>
+
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {HERO.chips.map((chip) => (
+              <li
+                key={chip.label}
+                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/20 bg-white/[0.08] px-3 py-1.5 text-[13px] font-medium text-white backdrop-blur-sm"
+              >
+                <Icon name={chip.icon} className="h-4 w-4 shrink-0 text-[var(--color-secondary)]" strokeWidth={2.2} />
+                {chip.label}
+              </li>
+            ))}
+          </ul>
+
+          <a
+            href={PHONE_HREF}
+            className="mt-6 inline-flex items-center gap-2.5 rounded-xl border border-white/25 bg-white/10 px-5 py-3 font-bold text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)]"
+            aria-label={`Call Clear Choice at ${PHONE}`}
+          >
+            <Icon name="phone" className="h-5 w-5 text-[var(--color-secondary)]" strokeWidth={0} fill="currentColor" />
+            <span>
+              <span className="mr-1.5 text-sm font-normal text-white/70">Prefer to talk?</span>
+              {PHONE}
+            </span>
+          </a>
+        </Reveal>
       </div>
     </section>
   );

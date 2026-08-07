@@ -4,10 +4,14 @@ import { useTracking } from "@/hooks/useTracking";
 import { QueryParamPersistence } from "@/components/QueryParamPersistence";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { PainPoints } from "@/components/PainPoints";
-import { Capabilities } from "@/components/Capabilities";
-import { WhyPurposeBuilt } from "@/components/WhyPurposeBuilt";
-import { ProofBar } from "@/components/ProofBar";
+import { TrustBar } from "@/components/TrustBar";
+import { PriorityServices } from "@/components/PriorityServices";
+import { WhyClearChoice } from "@/components/WhyClearChoice";
+import { RecurringSavings } from "@/components/RecurringSavings";
+import { AdditionalServices } from "@/components/AdditionalServices";
+import { HowItWorks } from "@/components/HowItWorks";
+import { Testimonials } from "@/components/Testimonials";
+import { ServiceArea } from "@/components/ServiceArea";
 import { Faq } from "@/components/Faq";
 import { FinalCta } from "@/components/FinalCta";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -26,10 +30,14 @@ export default function Page() {
       <QueryParamPersistence />
       <Header />
       <Hero />
-      <PainPoints />
-      <Capabilities />
-      <WhyPurposeBuilt />
-      <ProofBar />
+      <TrustBar />
+      <PriorityServices />
+      <WhyClearChoice />
+      <RecurringSavings />
+      <AdditionalServices />
+      <HowItWorks />
+      <Testimonials />
+      <ServiceArea />
       <Faq />
       <FinalCta />
       <SiteFooter />

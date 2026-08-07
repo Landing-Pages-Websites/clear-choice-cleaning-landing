@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Sora, Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-const display = Sora({
+const display = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["500", "600", "700", "800"],
   variable: "--font-display-active",
   display: "swap",
 });
@@ -17,28 +17,30 @@ const body = Inter({
   display: "swap",
 });
 
-// === MEGA TAG CONFIG === (real QBC values — QBC opted out of Meta, so NO pixelId)
-const SITE_KEY = "5rn5f8eze80jvipf";
-const SITE_ID = "a6d7ae94-3574-4c2a-9642-4385d223e4e7";
-const GTM_ID = "GTM-5PN93D";
+// === MEGA TAG CONFIG === (Clear Choice — client declined Meta, so NO pixelId)
+const SITE_KEY = "o919lqt9cidpi082";
+const SITE_ID = "033b2c33-c1ce-4962-969f-f81533113c12";
+const GTM_ID = "GTM-5SKCDNMX";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://book.clearchoicehomecleaningservices.com"),
   title:
-    "TireServ ERP — Free Demo for Tire & Automotive Wholesale Distributors | QBC Systems",
+    "Move-Out, Post-Construction & Office Cleaning in Metro Atlanta | Clear Choice Home Cleaning",
   description:
-    "TireServ is the ERP built exclusively for tire & automotive wholesale distributors. POS, inventory, purchasing, AR, AP, GL, and reporting in one cloud system with real-time wholesale integration. Purpose-built over 48 years. Get a free demo.",
+    "Clear Choice Home Cleaning Services — a veteran-owned, locally owned Alpharetta crew handling move-out, post-construction and office cleaning across metro Atlanta. All supplies included, eco-friendly products, free no-obligation quotes. Rated EXCELLENT across 30 five-star Google reviews.",
   openGraph: {
-    title: "TireServ ERP — Built Exclusively for Tire Wholesale Distributors",
+    title:
+      "Clear Choice Home Cleaning — Move-Out, Post-Construction & Office Cleaning in Metro Atlanta",
     description:
-      "One cloud system for POS, inventory, purchasing, and accounting — with real-time wholesale integration and mobile order entry. Purpose-built over 48 years by QBC Systems.",
-    images: ["/images/hero-warehouse.jpg"],
+      "Veteran-owned, locally owned Alpharetta cleaning crew. All supplies included, eco-friendly products, free no-obligation quotes. We don't cut corners. We clean them.",
+    images: ["/images/hero-living-room.jpg"],
     type: "website",
   },
   icons: {
     icon: "/icon.png",
     apple: "/apple-icon.png",
   },
-  robots: { index: false, follow: false }, // ads LP — not indexed
+  robots: { index: false, follow: false }, // paid LP — not indexed
 };
 
 export default function RootLayout({
@@ -66,10 +68,7 @@ export default function RootLayout({
       <body className="bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
         {children}
         {/* CallTrackingMetrics — universal Mega account (never remove) */}
-        <Script
-          src="https://572388.tctm.co/t.js"
-          strategy="afterInteractive"
-        />
+        <Script src="https://572388.tctm.co/t.js" strategy="afterInteractive" />
       </body>
     </html>
   );

@@ -2,14 +2,20 @@
 
 import { useEffect, useRef, useState, ReactNode } from "react";
 
+// Fade-up 12px / 420ms on first intersection (§ motion spec). The visual
+// state is driven by [data-reveal] rules in globals.css, which also force the
+// final state immediately under prefers-reduced-motion.
 export function Reveal({
   children,
   className = "",
   delay = 0,
+  as: Tag = "div",
 }: {
   children: ReactNode;
   className?: string;
+  /** Sibling stagger in ms — brief typically passes i * 60. */
   delay?: number;
+  as?: "div" | "li";
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -17,27 +23,30 @@ export function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTimeout(() => setVisible(true), delay);
+          timer = setTimeout(() => setVisible(true), delay);
           observer.disconnect();
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (timer) clearTimeout(timer);
+    };
   }, [delay]);
 
   return (
-    <div
-      ref={ref}
-      className={`transition-all duration-1000 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      } ${className}`}
+    <Tag
+      ref={ref as never}
+      data-reveal=""
+      className={`${visible ? "is-visible" : ""} ${className}`}
     >
       {children}
-    </div>
+    </Tag>
   );
 }

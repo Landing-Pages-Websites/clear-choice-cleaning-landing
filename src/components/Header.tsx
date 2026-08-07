@@ -1,60 +1,56 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { CTA, PHONE, PHONE_HREF } from "@/lib/content";
+import { CTA, PHONE, PHONE_HREF, NAV_LINKS } from "@/lib/content";
 import { Icon } from "@/components/icons";
 
+// Solid white from scroll 0 with a 1px hairline — never transparent over the
+// hero photo, so the logo and buttons stay legible at all times.
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/95 backdrop-blur-md border-b border-[var(--color-border)] shadow-[0_1px_12px_-6px_rgba(10,22,40,0.25)]"
-          : "bg-white/80 backdrop-blur-sm border-b border-transparent"
-      }`}
-    >
-      <div className="mx-auto max-w-7xl px-5 md:px-8 flex items-center justify-between py-2.5 md:py-3">
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-[var(--color-border)] bg-white">
+      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-3 px-4 py-2.5 md:px-8 md:py-3">
         <Link
-          href={CTA.demoAnchor}
-          className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
-          aria-label="QBC Systems — TireServ home"
+          href="#hero"
+          className="flex shrink-0 items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)]"
+          aria-label="Clear Choice Home Cleaning Services — home"
         >
           <Image
             src="/logo.png"
-            alt="QBC Systems"
-            width={249}
-            height={120}
+            alt="Clear Choice Home Cleaning Services"
+            width={569}
+            height={96}
             priority
-            className="h-12 md:h-14 w-auto object-contain"
+            className="h-8 w-auto max-w-[190px] object-contain md:h-10 md:max-w-none"
           />
         </Link>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="text-sm font-semibold text-[var(--color-ink)] transition-colors hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)] rounded"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex shrink-0 items-center gap-2 md:gap-3">
           <a
             href={PHONE_HREF}
-            className="hidden sm:inline-flex items-center gap-2 border-[1.5px] border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-surface)] transition-colors rounded-lg px-4 py-2 md:py-2.5 font-semibold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
-            aria-label={`Call QBC Systems at ${PHONE}`}
+            className="inline-flex items-center gap-1.5 rounded-xl border-[1.5px] border-[var(--color-primary)] px-2.5 py-2 text-[13px] font-bold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)] md:px-4 md:text-sm"
+            aria-label={`Call Clear Choice at ${PHONE}`}
           >
-            <Icon name="phone" className="w-4 h-4" strokeWidth={0} fill="currentColor" />
-            <span>{PHONE}</span>
+            <Icon name="phone" className="h-4 w-4 shrink-0" strokeWidth={0} fill="currentColor" />
+            <span className="whitespace-nowrap">{PHONE}</span>
           </a>
           <a
-            href={CTA.demoAnchor}
-            className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-colors rounded-lg px-4 md:px-5 py-2 md:py-2.5 font-semibold text-sm shadow-cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2"
+            href={CTA.quoteAnchor}
+            className="hidden items-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-bold text-white shadow-cta transition-colors hover:bg-[var(--color-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)] focus-visible:ring-offset-2 sm:inline-flex"
           >
             {CTA.primary}
-            <Icon name="arrow" className="w-3.5 h-3.5" strokeWidth={2.5} />
+            <Icon name="arrow" className="h-3.5 w-3.5" strokeWidth={2.5} />
           </a>
         </div>
       </div>

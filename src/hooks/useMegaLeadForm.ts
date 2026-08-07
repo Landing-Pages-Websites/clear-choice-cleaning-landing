@@ -159,8 +159,8 @@ export const useMegaLeadForm = (): UseMegaLeadFormReturn => {
         }
         formData.phone = digits;
       }
-      if (!formData.firstName || !formData.email) {
-        throw new Error("firstName and email are required");
+      if (!formData.first_name || !formData.email) {
+        throw new Error("first_name and email are required");
       }
 
       const attribution = initAttribution();

@@ -1,70 +1,110 @@
 {
-  "repo": "Landing-Pages-Websites/qbc-systems-landing",
-  "customer_id": "16ee8343-6dad-4978-987d-49a4f59ef473",
-  "customer_name": "QBC Systems, Inc.",
-  "primary_subdomain": "https://info.qbc.com",
-  "product": "TireServ — ERP software for tire & automotive wholesale distributors",
+  "repo": "Landing-Pages-Websites/clear-choice-cleaning-landing",
+  "customer_id": "8155b611-55c6-4d4b-9766-d094b6a3c291",
+  "customer_name": "Clear Choice Home Cleaning Services LLC",
+  "primary_subdomain": "https://book.clearchoicehomecleaningservices.com",
+  "product": "Residential & commercial cleaning — move-out, post-construction, and office cleaning across metro Atlanta",
   "claims": [
     {
-      "claim": "48 years building software exclusively for tire and automotive wholesale distributors",
-      "source_url": "task spec: Atlas task 7641bdba input_data.content_requests ('48 years in business, purpose-built for tire distribution') + MEGA ads strategy email (max.lester@gomega.ai / Lindsay intake, 2026-07-02, §5 Creative Strategy: 'Authority and longevity — 48 years purpose-built for tire and wholesale distribution')",
-      "corroboration": "Customer memory (customer_memories, QBC): 'Founded: 1978' → 2026 − 1978 = 48 years.",
-      "verified": true,
-      "note": "Client-provided/spec-derived authority stat. qbc.com's aging site states 'over 30 years' in older boilerplate; the current, client-confirmed figure per the 2026 strategy intake is 48 years (founded 1978). If the client prefers the conservative site figure, this is a one-word swap — flagged in escalations."
-    },
-    {
-      "claim": "Purpose-built ERP for tire distribution — not a generic ERP adapted after the fact",
-      "source_url": "https://www.qbc.com/erp-software-solutions/tireserv/ ('Distribution ERP Software Designed Exclusively for Tire and Automotive Supply Distributors, Wholesalers, Retail Stores, and Warehouses')",
+      "claim": "Rated EXCELLENT across 30 five-star Google reviews (TrustIndex-verified)",
+      "attribution": "Google Business Profile reviews, surfaced via TrustIndex",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
+      "note": "Provided on the MEGA strategy call 2026-08-07. The only review-count number permitted on the page.",
       "verified": true
     },
     {
-      "claim": "Cloud-based, browser-only access (nothing to install)",
-      "source_url": "https://www.qbc.com/erp-software-solutions/tireserv/ ('TireServ is a cloud based Tire distribution software application package... Accessible anytime, anywhere, this user friendly Cloud based application only requires a web browser for complete access.')",
+      "claim": "Recurring-service savings: 20% off weekly, 10% off biweekly, 5% off monthly",
+      "attribution": "MEGA strategy call 2026-08-07 (evergreen offer confirmed by client)",
+      "source_url": "MEGA strategy call 2026-08-07",
+      "note": "Framed as ongoing savings mentioned at quote time — no dollar figures, no countdown, no expiry.",
       "verified": true
     },
     {
-      "claim": "Full ERP stack in one system: POS, inventory management, purchasing, AR, AP, GL, and reporting",
-      "source_url": "https://www.qbc.com/erp-software-solutions/tireserv/ ('Fully Integrated Accounting, Ecommerce, Point of Sale & Inventory Management') + MEGA strategy email §10 Focus Areas + task input_data.content_requests",
+      "claim": "Veteran-owned and locally owned in Alpharetta, GA",
+      "attribution": "MEGA strategy call 2026-08-07",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
       "verified": true
     },
     {
-      "claim": "Over 100 standard reports & inquiries",
-      "source_url": "https://www.qbc.com/erp-software-solutions/tireserv/ ('Over 100 Standard Reports & Inquiries')",
+      "claim": "The owner (Michael Jones) personally confirms satisfaction before the crew leaves",
+      "attribution": "Documented in the Cynthia Brown-McNeill Google review; stated as a practice, never as a warranty",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
       "verified": true
     },
     {
-      "claim": "Real-time integration with major wholesale tire platforms",
-      "source_url": "task spec: Atlas task 7641bdba input_data.content_requests + MEGA strategy email §5/§10 ('Real-time integration with major wholesale tire platforms'). Corroborated on qbc.com TireServ page: 'ATD Integration' + 'Integrated Tire Guide Pro'.",
+      "claim": "Crew brings all cleaning supplies and equipment; eco-friendly products used",
+      "attribution": "MEGA strategy call 2026-08-07",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
       "verified": true
     },
     {
-      "claim": "Mobile order entry and Telegram-based reporting",
-      "source_url": "task spec: Atlas task 7641bdba input_data.content_requests + MEGA strategy email §5 Creative Strategy ('mobile order entry, Telegram-based reporting')",
+      "claim": "Free, no-obligation quotes; every job quoted individually (no published prices)",
+      "attribution": "MEGA strategy call 2026-08-07",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
       "verified": true
     },
     {
-      "claim": "Multi-company, multi-branch functionality; flexible inventory pricing rules; barcoding & data collection ready",
-      "source_url": "https://www.qbc.com/erp-software-solutions/tireserv/ (TireServ Features list)",
+      "claim": "Service area — roughly a 40-mile radius of Atlanta: Alpharetta, Sandy Springs, Roswell, Johns Creek, Cumming, Milton, Suwanee, Duluth and the surrounding metro Atlanta area",
+      "attribution": "MEGA strategy call 2026-08-07",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
       "verified": true
     },
     {
-      "claim": "Software with a Personal Touch (owner-operated, full-service software + hardware + IT + training)",
-      "source_url": "https://www.qbc.com/ (site tagline 'QBC Systems, Inc. Software with a Personal Touch') + customer_memory (full-service model)",
-      "verified": true
-    },
-    {
-      "claim": "Based in Amherst, NY — 25 Hazelwood Dr, Amherst, NY 14228; phone routes to 716-691-5201",
-      "source_url": "https://www.qbc.com/ (footer contact block)",
+      "claim": "Hours: 9am–6pm, 7 days a week",
+      "attribution": "MEGA strategy call 2026-08-07",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
       "verified": true
     }
   ],
-  "testimonials": [],
-  "testimonials_note": "No customer testimonials or star ratings exist on qbc.com; none fabricated. Proof section uses factual credentials only.",
+  "testimonials": [
+    {
+      "claim": "Within less than a year of occupancy, my rental property was left in an appalling condition by the tenants. The level of filth was unlike anything I've ever encountered… Fortunately, Clear Choice Home Cleaning Services delivered outstanding results. They restored the property to its original condition with exceptional care and efficiency. I highly recommend their services.",
+      "attribution": "Pamela Cathey — Google review",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
+      "verified": true
+    },
+    {
+      "claim": "I called on a Sunday, House was cleaned on Monday. Fantastic Job, they cleaned everything!",
+      "attribution": "Patrick Morgan (Captain) — Google review",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
+      "verified": true,
+      "note": "Reviewer's real name contains the token 'Patrick', which trips the template-residue grep (that grep targets QBC's owner Patrick). This is a legitimate required verbatim reviewer name, NOT scaffold residue — kept per the explicit testimonials instruction. Flagged so the reviewer understands the single expected grep hit."
+    },
+    {
+      "claim": "I found mr. Jones on Google, I called and the next day, which was today, the cleaners came out, and when I tell you, my home is spotless, oh my God. To Top all of this off, Mr. Jones called approximately 15 minutes before the cleaners left to make sure I was satisfied. I highly recommend! This is TOP-NOTCH cleaning service with EXCEPTIONAL customer service!",
+      "attribution": "Cynthia Brown-McNeill — Google review",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
+      "verified": true
+    },
+    {
+      "claim": "I needed some deep cleaning done in my home… I'm a very particular person when it comes to cleaning and has always been skeptical when having outsiders come in and clean for me. When Christina and Sylvia arrived they did a walk through with me and were clear as to what I needed done. They did a fabulous job and I was extremely pleased with their service.",
+      "attribution": "Elsiemae Simmons — Google review",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
+      "verified": true
+    },
+    {
+      "claim": "Clear Choice Home Cleaning Services exceeded my expectations! The team was professional, punctual, and paid great attention to detail. Every room looked spotless and smelled fresh — they truly went above and beyond. Communication was excellent, and they made sure I was completely satisfied before leaving.",
+      "attribution": "Alonzo Foster — Google review",
+      "source_url": "https://clearchoicehomecleaningservices.com/",
+      "verified": true
+    }
+  ],
   "images": [
-    { "file": "public/images/hero-warehouse.jpg", "subject": "tire distribution warehouse", "source": "AI-generated (mega image generate, nano_banana) — tire/automotive-distribution-specific, faces not focal per imagery rule", "verified": true },
-    { "file": "public/images/mobile-order.jpg", "subject": "hands-on-tablet mobile order entry in a distribution center", "source": "AI-generated (mega image generate)", "verified": true },
-    { "file": "public/images/loading-dock.jpg", "subject": "tire wholesale loading dock operations", "source": "AI-generated (mega image generate)", "verified": true },
-    { "file": "public/images/dashboard-laptop.jpg", "subject": "ERP software dashboard on a laptop at a distribution counter", "source": "AI-generated (mega image generate)", "verified": true },
-    { "file": "public/images/pos-counter.jpg", "subject": "tire distribution point-of-sale counter", "source": "AI-generated (mega image generate)", "verified": true }
+    { "file": "public/images/hero-living-room.jpg", "subject": "residential living room (hero background + OG image)", "source": "Real client photo", "verified": true },
+    { "file": "public/images/service-move-out.jpg", "subject": "freshly cleaned hardwood floor, move-out ready", "source": "Real client photo", "verified": true },
+    { "file": "public/images/service-post-construction.jpg", "subject": "tiled interior being cleared after construction", "source": "Real client photo", "verified": true },
+    { "file": "public/images/service-office.jpg", "subject": "bright, tidy office / meeting room", "source": "Real client photo", "verified": true },
+    { "file": "public/images/crew-at-work.jpg", "subject": "cleaning crew in branded aprons at work", "source": "Real client photo", "verified": true },
+    { "file": "public/images/crew-office-door.jpg", "subject": "team member arriving at a doorway with equipment", "source": "Real client photo", "verified": true },
+    { "file": "public/images/kitchen-clean.jpg", "subject": "clean residential kitchen", "source": "Real client photo", "verified": true },
+    { "file": "public/images/bathroom-clean.jpg", "subject": "sanitized, spotless bathroom", "source": "Real client photo", "verified": true },
+    { "file": "public/images/kitchen-appliance.jpg", "subject": "wiped-down kitchen appliance and counter", "source": "Real client photo", "verified": true }
+  ],
+  "bans_observed": [
+    "No years-in-business or founding year anywhere (Tucson '18 years' residue excluded).",
+    "No licensed/bonded/insured/certified/ISSA/ARCSI/Green Seal/EPA Safer Choice claims.",
+    "No prices in copy — the single '$130' figure appears only on the form's rate_alignment label.",
+    "No same-day, 24/7, money-back, free re-clean, satisfaction warranty, or guaranteed response time.",
+    "No invented statistics; no before/after gallery; no geography outside metro Atlanta; no careers/hiring content."
   ]
 }
