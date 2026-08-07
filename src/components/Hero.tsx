@@ -19,14 +19,17 @@ export function Hero() {
           sizes="100vw"
           className="object-cover object-center"
         />
-        {/* Left-weighted scrim (~72% → 0%) on desktop; stronger overall on mobile for AA */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-ink)]/90 via-[var(--color-ink)]/70 to-[var(--color-ink)]/35 lg:from-[var(--color-ink)]/85 lg:via-[var(--color-ink)]/50 lg:to-transparent" />
+        {/* Mobile: near-solid vertical scrim under the full-bleed copy (photo stays faintly visible). */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-ink)]/88 via-[var(--color-ink)]/84 to-[var(--color-ink)]/88 lg:hidden" />
+        {/* Desktop: left-weighted scrim held at ~80-88% under the copy column, fading to 0 by the right edge. */}
+        <div className="absolute inset-0 hidden lg:block bg-gradient-to-r from-[var(--color-ink)]/90 from-0% via-[var(--color-ink)]/80 via-42% to-transparent to-82%" />
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-[1200px] gap-6 px-4 pb-12 pt-20 md:px-8 md:pb-20 md:pt-28 lg:grid-cols-2 lg:gap-x-12 lg:gap-y-6 lg:items-start">
+      <div className="relative z-10 mx-auto grid max-w-[1200px] gap-6 px-4 pb-12 pt-20 md:px-8 md:pb-20 md:pt-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:grid-rows-[auto_1fr] lg:gap-x-12 lg:gap-y-6 lg:items-start">
         {/* 1 — Headline (mobile: first; desktop: left/top) */}
         <Reveal className="order-1 lg:col-start-1 lg:row-start-1">
-          <h1 className="t-h1 text-white">{HERO.h1}</h1>
+          {/* Non-breaking hyphen keeps "Post‑Construction" on one line; wider column handles the rest. */}
+          <h1 className="t-h1 text-white">{HERO.h1.replace("Post-Construction", "Post‑Construction")}</h1>
           <p className="mt-3 text-xl font-semibold text-[var(--color-secondary)] md:text-2xl">
             {HERO.h1Tagline}
           </p>

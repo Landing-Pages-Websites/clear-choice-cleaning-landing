@@ -30,30 +30,35 @@
   color-scheme: light;
 }
 
-html, body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
+/* Base element rules live in @layer base so Tailwind v4 utilities (which sit in
+   @layer utilities, a later layer) can always override them. Bare-element
+   selectors left unlayered would beat utilities and defeat e.g. `text-white`. */
+@layer base {
+  html, body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
 
-/* Body type — 16px mobile / 17px desktop, generous line-height (§ type spec) */
-body {
-  font-size: 16px;
-  line-height: 1.65;
-}
+  /* Body type — 16px mobile / 17px desktop, generous line-height (§ type spec) */
+  body {
+    font-size: 16px;
+    line-height: 1.65;
+  }
 
-@media (min-width: 768px) {
-  body { font-size: 17px; }
-}
+  @media (min-width: 768px) {
+    body { font-size: 17px; }
+  }
 
-h1, h2, h3, h4 {
-  font-family: var(--font-display);
-  color: var(--color-ink);
-  letter-spacing: -0.02em;
-  font-weight: 800;
-  text-wrap: balance;
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+    font-weight: 800;
+    text-wrap: balance;
+  }
 }
 
 /* Deliberate display type scale (§ type spec) — mobile-first, desktop bumps.
@@ -96,8 +101,10 @@ h1, h2, h3, h4 {
 }
 
 /* Anchor offset so sections land below the fixed header */
-html { scroll-behavior: smooth; scroll-padding-top: 88px; }
-section[id] { scroll-margin-top: 88px; }
+@layer base {
+  html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+  section[id] { scroll-margin-top: 88px; }
+}
 
 /* ─── Inline per-field validation ─── */
 .lp-input-error {
