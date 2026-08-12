@@ -20,6 +20,10 @@ declare global {
   }
 }
 
+// Submit-level failure copy. Retryable, and points to email as the fallback.
+const SUBMIT_ERROR_MESSAGE =
+  "Something went wrong sending your request. Please try again, or email us at michael@clearchoicehomecleaningservices.com.";
+
 // Email pattern also lives on the <input> so native validation enforces it.
 const EMAIL_PATTERN = "[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}";
 const PHONE_PATTERN = "\\(\\d{3}\\) \\d{3}-\\d{4}";
@@ -74,6 +78,7 @@ export function FormCard({
   const [data, setData] = useState<FormState>(INITIAL);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
   // Synchronous re-entrancy latch — a rapid click burst yields exactly ONE fire.
@@ -102,9 +107,10 @@ export function FormCard({
     if (inFlightRef.current || submitted) return;
     inFlightRef.current = true;
     setSubmitting(true);
+    setSubmitError(null);
     const qualified = data.rate_alignment !== "No";
     try {
-      await submit({
+      const res = await submit({
         first_name: data.first_name.trim(),
         last_name: data.last_name.trim(),
         email: data.email.trim(),
@@ -115,12 +121,18 @@ export function FormCard({
         qualified,
         route_slug: routeSlug || (typeof window !== "undefined" ? window.location.pathname : "/"),
       });
+      // A 2xx with a body that isn't {ok:true} is still a dropped lead. Only
+      // confirmed success fires conversions and shows the thank-you card.
+      if (res?.ok !== true) {
+        throw new Error("Submission not confirmed by server.");
+      }
       fireTracking(qualified);
       setSubmitted(true);
-    } catch {
-      // Never strand the user — still show the thank-you + fire tracking.
-      fireTracking(qualified);
-      setSubmitted(true);
+    } catch (err) {
+      console.error("Form submission error:", err);
+      // The visitor is fine, but the LEAD would be dropped: surface a retryable
+      // error and fire NO tracking so we never bill a phantom conversion.
+      setSubmitError(SUBMIT_ERROR_MESSAGE);
     } finally {
       inFlightRef.current = false;
       setSubmitting(false);
@@ -251,6 +263,16 @@ export function FormCard({
         onChange={(v) => update("rate_alignment", v)}
         disabled={submitting}
       />
+
+      {submitError && (
+        <p
+          role="alert"
+          aria-live="polite"
+          className="lp-field-error !mt-0 rounded-lg border border-[var(--color-error)]/35 bg-[#fef3f2] px-3.5 py-2.5"
+        >
+          {submitError}
+        </p>
+      )}
 
       <button
         type="button"
