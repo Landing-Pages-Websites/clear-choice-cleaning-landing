@@ -47,6 +47,21 @@ export function SiteFooter() {
             © {CURRENT_YEAR} {BRAND.company}. All rights reserved. Veteran-owned and locally owned in
             Alpharetta, GA.
           </p>
+          <p className="mt-3 font-semibold">
+            <a
+              href="/privacy-policy"
+              className="text-[var(--color-primary)] underline underline-offset-4 hover:text-[var(--color-primary-hover)]"
+            >
+              Privacy Policy
+            </a>
+            {" · "}
+            <a
+              href="/terms-and-conditions"
+              className="text-[var(--color-primary)] underline underline-offset-4 hover:text-[var(--color-primary-hover)]"
+            >
+              Terms &amp; Conditions
+            </a>
+          </p>
         </div>
       </div>
     </footer>
