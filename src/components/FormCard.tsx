@@ -37,6 +37,7 @@ interface FormState {
   zip_code: string;
   cleaning_type: string;
   rate_alignment: string;
+  smsConsent: boolean;
 }
 
 const INITIAL: FormState = {
@@ -47,7 +48,14 @@ const INITIAL: FormState = {
   zip_code: "",
   cleaning_type: "",
   rate_alignment: "",
+  smsConsent: false,
 };
+
+const PRIVACY_POLICY_URL = "https://book.clearchoicehomecleaningservices.com/privacy-policy";
+const TERMS_URL = "https://book.clearchoicehomecleaningservices.com/terms-and-conditions";
+
+const SMS_CONSENT_TEXT =
+  "By checking this box, you agree to receive SMS customer-care messages from Clear Choice Home Cleaning Services, including quote follow-ups, appointment confirmations, scheduling reminders, and service updates. Message frequency may vary. Standard Message and Data Rates may apply. Reply STOP to opt out. Reply HELP for help. Consent is not a condition of purchase. Your mobile information will not be sold or shared with third parties for promotional or marketing purposes.";
 
 function formatPhone(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -118,6 +126,10 @@ export function FormCard({
         zip_code: data.zip_code.trim(),
         cleaning_type: data.cleaning_type,
         rate_alignment: data.rate_alignment,
+        smsConsent: data.smsConsent,
+        smsConsentText: data.smsConsent
+          ? `${SMS_CONSENT_TEXT} Privacy Policy: ${PRIVACY_POLICY_URL} | Terms & Conditions: ${TERMS_URL}`
+          : "Not provided",
         qualified,
         route_slug: routeSlug || (typeof window !== "undefined" ? window.location.pathname : "/"),
       });
@@ -263,6 +275,43 @@ export function FormCard({
         onChange={(v) => update("rate_alignment", v)}
         disabled={submitting}
       />
+
+      {/* SMS opt-in (optional — never required, never blocks submit) */}
+      <div>
+        <label
+          htmlFor={`${idPrefix}-smsConsent`}
+          className="flex cursor-pointer items-start gap-2.5 text-[13px] leading-relaxed text-[var(--color-muted)]"
+        >
+          <input
+            id={`${idPrefix}-smsConsent`}
+            name="smsConsent"
+            type="checkbox"
+            checked={data.smsConsent}
+            onChange={(e) => setData((d) => ({ ...d, smsConsent: e.target.checked }))}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--color-border)] accent-[var(--color-accent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)]/40"
+            disabled={submitting}
+          />
+          <span>
+            {SMS_CONSENT_TEXT}{" "}
+            <a
+              href="/privacy-policy"
+              className="font-semibold text-[var(--color-primary)] underline"
+            >
+              Privacy Policy
+            </a>
+            {" | "}
+            <a
+              href="/terms-and-conditions"
+              className="font-semibold text-[var(--color-primary)] underline"
+            >
+              Terms &amp; Conditions
+            </a>
+          </span>
+        </label>
+        <p className="mt-1.5 pl-[1.625rem] text-[12px] leading-relaxed text-[var(--color-muted)]">
+          Optional. You can submit this form without opting in to text messages.
+        </p>
+      </div>
 
       {submitError && (
         <p
