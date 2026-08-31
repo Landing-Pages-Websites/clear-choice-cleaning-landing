@@ -10,6 +10,7 @@ import {
   RATE_OPTIONS,
 } from "@/lib/content";
 import { Icon } from "@/components/icons";
+import { isZipInServiceArea, SERVICE_AREA_MESSAGE } from "@/lib/serviceArea";
 
 declare global {
   interface Window {
@@ -87,6 +88,9 @@ export function FormCard({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Out-of-area ZIP block. Independent of submitError so both can be shown/
+  // cleared on their own. Cleared the moment the ZIP is edited.
+  const [serviceAreaBlocked, setServiceAreaBlocked] = useState(false);
 
   const formRef = useRef<HTMLFormElement>(null);
   // Synchronous re-entrancy latch — a rapid click burst yields exactly ONE fire.
@@ -158,6 +162,13 @@ export function FormCard({
     if (!form) return;
     if (!form.checkValidity()) {
       form.reportValidity();
+      return;
+    }
+    // Service-area guard runs AFTER native validity and BEFORE requestSubmit, so
+    // the blocked path never reaches onSubmit, fireTracking, or the endpoint.
+    // A rapid click burst just re-sets the same flag and returns each time.
+    if (!isZipInServiceArea(data.zip_code)) {
+      setServiceAreaBlocked(true);
       return;
     }
     form.requestSubmit();
@@ -250,9 +261,25 @@ export function FormCard({
         autoComplete="postal-code"
         placeholder="30004"
         value={data.zip_code}
-        onChange={(v) => update("zip_code", v.replace(/\D/g, "").slice(0, 5))}
+        onChange={(v) => {
+          // Editing the ZIP clears the block so the visitor can correct it.
+          if (serviceAreaBlocked) setServiceAreaBlocked(false);
+          update("zip_code", v.replace(/\D/g, "").slice(0, 5));
+        }}
         disabled={submitting}
+        ariaInvalid={serviceAreaBlocked}
+        ariaDescribedBy={serviceAreaBlocked ? `${idPrefix}-zip_code-service-area-error` : undefined}
       />
+      {serviceAreaBlocked && (
+        <p
+          id={`${idPrefix}-zip_code-service-area-error`}
+          role="alert"
+          aria-live="polite"
+          className="lp-field-error !mt-0 rounded-lg border border-[var(--color-error)]/35 bg-[#fef3f2] px-3.5 py-2.5"
+        >
+          {SERVICE_AREA_MESSAGE}
+        </p>
+      )}
 
       <SelectField
         id={`${idPrefix}-cleaning_type`}
@@ -358,6 +385,8 @@ interface FieldProps {
   maxLength?: number;
   placeholder?: string;
   autoComplete?: string;
+  ariaInvalid?: boolean;
+  ariaDescribedBy?: string;
 }
 
 function Field({
@@ -373,6 +402,8 @@ function Field({
   maxLength,
   placeholder,
   autoComplete,
+  ariaInvalid,
+  ariaDescribedBy,
 }: FieldProps) {
   return (
     <div>
@@ -393,6 +424,8 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         className={FIELD_CLS}
         disabled={disabled}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
       />
     </div>
   );
