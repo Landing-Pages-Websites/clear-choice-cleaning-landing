@@ -40,6 +40,8 @@ export const HERO = {
   ],
   h1: "Move-Out, Post-Construction & Office Cleaning Across Metro Atlanta",
   h1Tagline: "We don't cut corners. We clean them.",
+  rateLine:
+    "Professional cleaning rates start at $130. Request a clear, no-obligation cleaning quote.",
   subhead:
     "A veteran-owned, locally owned Alpharetta crew that brings all the supplies and equipment. Free, no-obligation quotes on the space you need cleaned.",
 };

@@ -33,6 +33,9 @@ export function Hero() {
           <p className="mt-3 text-xl font-semibold text-[var(--color-secondary)] md:text-2xl">
             {HERO.h1Tagline}
           </p>
+          <p className="mt-4 max-w-xl text-[17px] font-medium leading-relaxed text-white/90">
+            {HERO.rateLine}
+          </p>
         </Reveal>
 
         {/* 2 — Form (mobile: second, above the fold; desktop: right column) */}
