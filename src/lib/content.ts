@@ -39,6 +39,7 @@ export const HERO = {
     { icon: "spray", label: "Supplies included" },
   ],
   h1: "Move-Out, Post-Construction & Office Cleaning Across Metro Atlanta",
+  homeCleaningLine: "House & Deep Cleaning in Metro Atlanta",
   h1Tagline: "We don't cut corners. We clean them.",
   rateLine:
     "Professional cleaning rates start at $130. Request a clear, no-obligation cleaning quote.",
@@ -98,6 +99,15 @@ export const PRIORITY_SERVICES = [
       "Breakroom, kitchen and restrooms cleaned and sanitized",
       "Entry and waiting areas vacuumed, mopped, trash removed",
     ],
+  },
+  {
+    id: "home-cleaning",
+    icon: "home",
+    title: "Home Cleaning",
+    image: "/images/home-cleaning.jpg",
+    imageAlt: "A clean residential living room after home cleaning service.",
+    body: "Standard, deep, recurring and single-visit home cleaning across the 40-mile Atlanta service area. Request a clear quote.",
+    inclusions: [],
   },
 ];
 

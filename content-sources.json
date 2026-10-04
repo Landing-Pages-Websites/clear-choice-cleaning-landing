@@ -98,7 +98,8 @@
     { "file": "public/images/crew-office-door.jpg", "subject": "team member arriving at a doorway with equipment", "source": "Real client photo", "verified": true },
     { "file": "public/images/kitchen-clean.jpg", "subject": "clean residential kitchen", "source": "Real client photo", "verified": true },
     { "file": "public/images/bathroom-clean.jpg", "subject": "sanitized, spotless bathroom", "source": "Real client photo", "verified": true },
-    { "file": "public/images/kitchen-appliance.jpg", "subject": "wiped-down kitchen appliance and counter", "source": "Real client photo", "verified": true }
+    { "file": "public/images/kitchen-appliance.jpg", "subject": "wiped-down kitchen appliance and counter", "source": "Real client photo", "verified": true },
+    { "file": "public/images/home-cleaning.jpg", "subject": "clean residential living room for home cleaning card", "source": "Client website: https://clearchoicehomecleaningservices.com/wp-content/uploads/2026/06/clean-living-room-alpharetta-ga.jpg", "verified": true }
   ],
   "bans_observed": [
     "No years-in-business or founding year anywhere (Tucson '18 years' residue excluded).",

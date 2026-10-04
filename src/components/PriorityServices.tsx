@@ -10,7 +10,7 @@ export function PriorityServices() {
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">What we do best</p>
           <h2 className="t-h2 mt-3 text-[var(--color-ink)]">
-            The three cleans metro Atlanta calls us for.
+            Our four cleaning services for metro Atlanta homes and businesses.
           </h2>
           <p className="mt-4 text-[var(--color-muted)]">
             Whichever you need, the crew arrives with every supply and tool — and Michael

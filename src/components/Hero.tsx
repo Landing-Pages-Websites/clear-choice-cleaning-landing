@@ -31,6 +31,9 @@ export function Hero() {
           {/* Non-breaking hyphen keeps "Post‑Construction" on one line; wider column handles the rest. */}
           <h1 className="t-h1 text-white">{HERO.h1.replace("Post-Construction", "Post‑Construction")}</h1>
           <p className="mt-3 text-xl font-semibold text-[var(--color-secondary)] md:text-2xl">
+            {HERO.homeCleaningLine}
+          </p>
+          <p className="mt-3 text-xl font-semibold text-[var(--color-secondary)] md:text-2xl">
             {HERO.h1Tagline}
           </p>
           <p className="mt-4 max-w-xl text-[17px] font-medium leading-relaxed text-white/90">
