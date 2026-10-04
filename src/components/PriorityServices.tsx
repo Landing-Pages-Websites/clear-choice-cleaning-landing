@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Reveal } from "@/components/Reveal";
 import { Icon } from "@/components/icons";
-import { CTA, PHONE, PHONE_HREF, PRIORITY_SERVICES } from "@/lib/content";
+import { CTA, PRIORITY_SERVICES } from "@/lib/content";
 
 export function PriorityServices() {
   return (
@@ -52,21 +52,13 @@ export function PriorityServices() {
                     ))}
                   </ul>
 
-                  {/* Dual-CTA row pinned to the card bottom */}
+                  {/* Quote CTA pinned to the card bottom */}
                   <div className="mt-auto flex flex-wrap items-center gap-2 pt-6">
                     <a
                       href={CTA.quoteAnchor}
-                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-bold text-white shadow-cta transition-colors hover:bg-[var(--color-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)] focus-visible:ring-offset-2"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-bold text-white shadow-cta transition-colors hover:bg-[var(--color-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)] focus-visible:ring-offset-2"
                     >
                       {CTA.primary}
-                    </a>
-                    <a
-                      href={PHONE_HREF}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border-[1.5px] border-[var(--color-primary)] px-4 py-2.5 text-sm font-bold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)]"
-                      aria-label={`Call Clear Choice at ${PHONE}`}
-                    >
-                      <Icon name="phone" className="h-4 w-4" strokeWidth={0} fill="currentColor" />
-                      Call
                     </a>
                   </div>
                 </div>

@@ -4,15 +4,11 @@
 // brief: no years-in-business, no credential claims, no prices in copy, no
 // warranty language, no invented statistics.
 
-export const PHONE = "(470) 622-8884";
-export const PHONE_HREF = "tel:4706228884";
-
 // The single conversion anchor every "get a quote" CTA points at.
 export const QUOTE_ANCHOR = "#contact";
 
 export const CTA = {
   primary: "Get My Free Quote",
-  phone: "Call (470) 622-8884",
   quoteAnchor: QUOTE_ANCHOR,
 };
 
@@ -263,7 +259,7 @@ export const FAQ = [
 // ─── Final CTA / contact ───
 export const FINAL_CTA = {
   headline: "Get your free, no-obligation cleaning quote.",
-  body: "Tell us the space and your date and we'll send a clear quote — no pressure, no obligation. Prefer to talk it through? Call and you'll reach Michael directly.",
+  body: "Tell us the space and your date and we'll send a clear quote — no pressure, no obligation.",
   trustLine: "Veteran-owned · Locally owned · 30 five-star Google reviews",
   trustItems: ["Veteran-owned", "Locally owned", "30 five-star Google reviews"],
 };

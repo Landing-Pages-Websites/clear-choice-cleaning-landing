@@ -1,7 +1,7 @@
 import { Reveal } from "@/components/Reveal";
 import { FormCard } from "@/components/FormCard";
 import { Icon } from "@/components/icons";
-import { FINAL_CTA, PHONE, PHONE_HREF, BRAND } from "@/lib/content";
+import { FINAL_CTA } from "@/lib/content";
 
 export function FinalCta() {
   return (
@@ -12,21 +12,6 @@ export function FinalCta() {
             <p className="eyebrow text-white/80">Free quote</p>
             <h2 className="t-h2 mt-3 text-white">{FINAL_CTA.headline}</h2>
             <p className="mt-4 text-lg leading-relaxed text-white/85">{FINAL_CTA.body}</p>
-
-            <div className="mt-8">
-              <p className="text-sm text-white/80">Prefer to talk first?</p>
-              <a
-                href={PHONE_HREF}
-                className="mt-2 inline-flex items-center gap-3 font-display text-3xl font-extrabold text-white transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-md md:text-4xl"
-                aria-label={`Call Clear Choice at ${PHONE}`}
-              >
-                <Icon name="phone" className="h-7 w-7" strokeWidth={0} fill="currentColor" />
-                {PHONE}
-              </a>
-              <p className="mt-3 text-sm text-white/80">
-                {BRAND.owner}, owner · Open {BRAND.hours}
-              </p>
-            </div>
 
             <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
               {FINAL_CTA.trustItems.map((item) => (

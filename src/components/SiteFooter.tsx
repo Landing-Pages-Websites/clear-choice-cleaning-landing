@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { BRAND, CURRENT_YEAR, PHONE, PHONE_HREF } from "@/lib/content";
-import { Icon } from "@/components/icons";
+import { BRAND, CURRENT_YEAR } from "@/lib/content";
 
 export function SiteFooter() {
   return (
@@ -24,16 +23,6 @@ export function SiteFooter() {
             <p className="font-semibold text-[var(--color-ink)]">{BRAND.company}</p>
             <p className="mt-1">{BRAND.address}</p>
             <p className="mt-1">Open {BRAND.hours}</p>
-            <p className="mt-2 md:flex md:justify-end">
-              <a
-                href={PHONE_HREF}
-                className="inline-flex items-center gap-2 font-semibold text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-hover)]"
-                aria-label={`Call Clear Choice at ${PHONE}`}
-              >
-                <Icon name="phone" className="h-4 w-4" strokeWidth={0} fill="currentColor" />
-                {PHONE}
-              </a>
-            </p>
             <p className="mt-1">
               <a href={BRAND.emailHref} className="transition-colors hover:text-[var(--color-ink)]">
                 {BRAND.email}

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CTA, PHONE, PHONE_HREF, NAV_LINKS } from "@/lib/content";
+import { CTA, NAV_LINKS } from "@/lib/content";
 import { Icon } from "@/components/icons";
 
 const HOME_URL = "https://book.clearchoicehomecleaningservices.com/";
@@ -45,14 +45,6 @@ export function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2 md:gap-3">
-          <a
-            href={PHONE_HREF}
-            className="inline-flex items-center gap-1.5 rounded-xl border-[1.5px] border-[var(--color-primary)] px-2.5 py-2 text-[13px] font-bold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)] md:px-4 md:text-sm"
-            aria-label={`Call Clear Choice at ${PHONE}`}
-          >
-            <Icon name="phone" className="h-4 w-4 shrink-0" strokeWidth={0} fill="currentColor" />
-            <span className="whitespace-nowrap">{PHONE}</span>
-          </a>
           <a
             href={toLanding(CTA.quoteAnchor)}
             className="hidden items-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-bold text-white shadow-cta transition-colors hover:bg-[var(--color-accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)] focus-visible:ring-offset-2 sm:inline-flex"

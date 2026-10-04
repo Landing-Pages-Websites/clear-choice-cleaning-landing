@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Reveal } from "@/components/Reveal";
 import { FormCard } from "@/components/FormCard";
 import { Icon } from "@/components/icons";
-import { HERO, PHONE, PHONE_HREF } from "@/lib/content";
+import { HERO } from "@/lib/content";
 
 export function Hero() {
   return (
@@ -48,7 +48,7 @@ export function Hero() {
           </Reveal>
         </div>
 
-        {/* 3 — Supporting copy, chips, tap-to-call (mobile: below form) */}
+        {/* 3 — Supporting copy and chips (mobile: below form) */}
         <Reveal delay={140} className="order-3 lg:col-start-1 lg:row-start-2">
           <p className="max-w-xl text-[17px] leading-relaxed text-white/85">{HERO.subhead}</p>
 
@@ -63,18 +63,6 @@ export function Hero() {
               </li>
             ))}
           </ul>
-
-          <a
-            href={PHONE_HREF}
-            className="mt-6 inline-flex items-center gap-2.5 rounded-xl border border-white/25 bg-white/10 px-5 py-3 font-bold text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)]"
-            aria-label={`Call Clear Choice at ${PHONE}`}
-          >
-            <Icon name="phone" className="h-5 w-5 text-[var(--color-secondary)]" strokeWidth={0} fill="currentColor" />
-            <span>
-              <span className="mr-1.5 text-sm font-normal text-white/70">Prefer to talk?</span>
-              {PHONE}
-            </span>
-          </a>
         </Reveal>
       </div>
     </section>

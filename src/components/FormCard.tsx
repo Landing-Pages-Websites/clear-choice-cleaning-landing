@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { useMegaLeadForm } from "@/hooks/useMegaLeadForm";
 import {
   CTA,
-  PHONE,
   CLEANING_TYPES,
   RATE_QUESTION_LABEL,
   RATE_OPTIONS,
@@ -183,10 +182,6 @@ export function FormCard({
           </div>
           <h3 className="t-h3 text-[var(--color-ink)]">Quote request received.</h3>
           <p className="text-[var(--color-muted)] leading-relaxed">{thankYouBody}</p>
-          <p className="text-[var(--color-muted)]">
-            Prefer to talk now? Call{" "}
-            <span className="font-semibold text-[var(--color-ink)] whitespace-nowrap">{PHONE}</span>.
-          </p>
         </div>
       </div>
     );
