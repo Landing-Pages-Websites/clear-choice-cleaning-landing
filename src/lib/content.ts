@@ -39,7 +39,7 @@ export const HERO = {
     { icon: "spray", label: "Supplies included" },
   ],
   h1: "Move-Out, Post-Construction & Office Cleaning Across Metro Atlanta",
-  homeCleaningLine: "House & Deep Cleaning in Metro Atlanta",
+  homeCleaningLine: "House Cleaning, Deep Cleaning & Maid Service in Metro Atlanta",
   h1Tagline: "We don't cut corners. We clean them.",
   rateLine:
     "Professional cleaning rates start at $130. Request a clear, no-obligation cleaning quote.",
