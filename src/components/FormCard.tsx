@@ -303,43 +303,6 @@ export function FormCard({
         disabled={submitting}
       />
 
-      {/* SMS opt-in (optional — never required, never blocks submit) */}
-      <div>
-        <label
-          htmlFor={`${idPrefix}-smsConsent`}
-          className="flex cursor-pointer items-start gap-2.5 text-[13px] leading-relaxed text-[var(--color-muted)]"
-        >
-          <input
-            id={`${idPrefix}-smsConsent`}
-            name="smsConsent"
-            type="checkbox"
-            checked={data.smsConsent}
-            onChange={(e) => setData((d) => ({ ...d, smsConsent: e.target.checked }))}
-            className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--color-border)] accent-[var(--color-accent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-secondary)]/40"
-            disabled={submitting}
-          />
-          <span>
-            {SMS_CONSENT_TEXT}{" "}
-            <a
-              href="/privacy-policy"
-              className="font-semibold text-[var(--color-primary)] underline"
-            >
-              Privacy Policy
-            </a>
-            {" | "}
-            <a
-              href="/terms-and-conditions"
-              className="font-semibold text-[var(--color-primary)] underline"
-            >
-              Terms &amp; Conditions
-            </a>
-          </span>
-        </label>
-        <p className="mt-1.5 pl-[1.625rem] text-[12px] leading-relaxed text-[var(--color-muted)]">
-          Optional. You can submit this form without opting in to text messages.
-        </p>
-      </div>
-
       {submitError && (
         <p
           role="alert"
