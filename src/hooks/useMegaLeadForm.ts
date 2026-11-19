@@ -2,14 +2,7 @@
 
 import { useEffect, useCallback, useRef } from "react";
 import { FORM } from "@/lib/content";
-import {
-  EMAIL_ERROR,
-  PHONE_ERROR,
-  isValidEmail,
-  isValidPhone,
-  normalizeEmail,
-  phoneDigits,
-} from "@/lib/fields";
+import { INQUIRY_FIELDS, hasInquiryShape, toInquiry, validateFields } from "@/lib/quoteForm";
 
 const CONFIG = {
   CUSTOMER_ID: FORM.customerId,
@@ -137,22 +130,21 @@ const initAttribution = (): Attribution => {
   return attr;
 };
 
-/** Defense in depth: the same pinned src/lib/fields.ts rules the form uses.
- *  Normalizes email and phone in place, so the lead sends the canonical values. */
-const validateLeadFields = (formData: Record<string, unknown>): void => {
-  if (formData.phone) {
-    if (!isValidPhone(String(formData.phone))) {
-      throw new Error(PHONE_ERROR);
-    }
-    formData.phone = phoneDigits(String(formData.phone));
+/** Defense in depth: the form's own six-field validator decides before anything is
+ *  sent. Returns the lead's form_data: the payload with the six fields normalized
+ *  exactly as the form does. The caller's object is never modified. */
+const validateLeadFields = (formData: Record<string, unknown>): Record<string, unknown> => {
+  // One read per field: what was judged is exactly what gets sent.
+  const fields: Record<string, unknown> = Object.fromEntries(INQUIRY_FIELDS.map((k) => [k, formData[k]]));
+  if (!hasInquiryShape(fields)) {
+    const nonText = INQUIRY_FIELDS.filter((k) => typeof fields[k] !== "string");
+    throw new Error(`Lead fields must be text: ${nonText.join(", ")}`);
   }
-  if (!formData.first_name || !formData.email) {
-    throw new Error("first_name and email are required");
+  const messages = Object.values(validateFields(fields));
+  if (messages.length > 0) {
+    throw new Error(messages.join("; "));
   }
-  if (!isValidEmail(formData.email)) {
-    throw new Error(EMAIL_ERROR);
-  }
-  formData.email = normalizeEmail(String(formData.email));
+  return { ...formData, ...toInquiry(fields) };
 };
 
 interface UseMegaLeadFormReturn {
@@ -172,14 +164,14 @@ export const useMegaLeadForm = (): UseMegaLeadFormReturn => {
 
   const submit = useCallback(
     async (formData: Record<string, unknown>): Promise<SubmissionResponse> => {
-      validateLeadFields(formData);
+      const leadData = validateLeadFields(formData);
       const attribution = initAttribution();
 
       const payload = {
         customer_id: CONFIG.CUSTOMER_ID,
         site_id: CONFIG.SITE_ID,
         source_provider: CONFIG.SOURCE_PROVIDER,
-        form_data: formData,
+        form_data: leadData,
         url: window.location.href,
         referrer_url: document.referrer || null,
         session_id: getSessionId(),
