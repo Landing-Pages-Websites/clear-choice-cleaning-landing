@@ -296,7 +296,7 @@ export function FormCard({
         <p
           role="alert"
           aria-live="polite"
-          className="lp-field-error !mt-0 rounded-lg border border-[var(--color-error)]/35 bg-[#fef3f2] px-3.5 py-2.5"
+          className="lp-field-error !mt-0 rounded-lg border border-[var(--color-error)]/35 bg-[#fef3f2] px-3.5 py-2.5 [overflow-wrap:anywhere]"
         >
           {SUBMIT_ERROR_LEAD} <span className="whitespace-nowrap">{PHONE}</span>
           {SUBMIT_ERROR_TAIL}
