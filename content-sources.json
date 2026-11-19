@@ -104,7 +104,7 @@
   "bans_observed": [
     "No years-in-business or founding year anywhere (Tucson '18 years' residue excluded).",
     "No licensed/bonded/insured/certified/ISSA/ARCSI/Green Seal/EPA Safer Choice claims.",
-    "No prices in copy — the single '$130' figure appears only on the form's rate_alignment label.",
+    "No prices in copy — the single '$130' starting-rate figure appears only in the hero rate line; the form's rate_alignment question was removed per client direction (task 8d4a3dc3, 2026-11-19).",
     "No same-day, 24/7, money-back, free re-clean, satisfaction warranty, or guaranteed response time.",
     "No invented statistics; no before/after gallery; no geography outside metro Atlanta; no careers/hiring content."
   ]

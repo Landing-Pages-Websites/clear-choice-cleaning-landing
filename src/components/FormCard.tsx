@@ -6,8 +6,6 @@ import {
   CTA,
   PHONE,
   CLEANING_TYPES,
-  RATE_QUESTION_LABEL,
-  RATE_OPTIONS,
 } from "@/lib/content";
 import { Icon } from "@/components/icons";
 import { isZipInServiceArea, SERVICE_AREA_MESSAGE } from "@/lib/serviceArea";
@@ -37,7 +35,6 @@ interface FormState {
   phone: string;
   zip_code: string;
   cleaning_type: string;
-  rate_alignment: string;
   smsConsent: boolean;
 }
 
@@ -48,7 +45,6 @@ const INITIAL: FormState = {
   phone: "",
   zip_code: "",
   cleaning_type: "",
-  rate_alignment: "",
   smsConsent: false,
 };
 
@@ -120,7 +116,8 @@ export function FormCard({
     inFlightRef.current = true;
     setSubmitting(true);
     setSubmitError(null);
-    const qualified = data.rate_alignment !== "No";
+    // Every confirmed lead qualifies — the rate screening question was removed.
+    const qualified = true;
     try {
       const res = await submit({
         first_name: data.first_name.trim(),
@@ -129,7 +126,6 @@ export function FormCard({
         phone: data.phone.replace(/\D/g, ""),
         zip_code: data.zip_code.trim(),
         cleaning_type: data.cleaning_type,
-        rate_alignment: data.rate_alignment,
         smsConsent: data.smsConsent,
         smsConsentText: data.smsConsent
           ? `${SMS_CONSENT_TEXT} Privacy Policy: ${PRIVACY_POLICY_URL} | Terms & Conditions: ${TERMS_URL}`
@@ -289,17 +285,6 @@ export function FormCard({
         options={CLEANING_TYPES}
         value={data.cleaning_type}
         onChange={(v) => update("cleaning_type", v)}
-        disabled={submitting}
-      />
-
-      <SelectField
-        id={`${idPrefix}-rate_alignment`}
-        name="rate_alignment"
-        label={RATE_QUESTION_LABEL}
-        placeholder="Select one"
-        options={RATE_OPTIONS}
-        value={data.rate_alignment}
-        onChange={(v) => update("rate_alignment", v)}
         disabled={submitting}
       />
 

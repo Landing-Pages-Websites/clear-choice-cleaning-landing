@@ -289,11 +289,6 @@ export const CLEANING_TYPES = [
   "One-time cleaning",
 ];
 
-// The rate-alignment qualifier — the sole place a price figure appears on the page.
-export const RATE_QUESTION_LABEL =
-  "Are you comfortable with professional cleaning rates starting at $130?";
-export const RATE_OPTIONS = ["Yes", "No"];
-
 // ─── Mega tracking — Clear Choice IDs. NO Meta Pixel (client declined Meta). ───
 export const TRACKING = {
   siteKey: "o919lqt9cidpi082",
