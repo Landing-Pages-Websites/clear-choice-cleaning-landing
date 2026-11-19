@@ -41,7 +41,14 @@ function isValidText(value: string): boolean {
   return trimmed.length > 0 && trimmed.length <= TEXT_MAX_LENGTH;
 }
 
-/** The one validator for every submit path (button, Enter, onSubmit backstop). */
+/** For an untyped programmatic payload (the hook's submit): every declared field must
+ *  already be a string. Nothing is coerced, so null, numbers, arrays or objects stay
+ *  invalid instead of turning into valid-looking text. */
+export function hasInquiryShape(record: Record<string, unknown>): record is Inquiry {
+  return INQUIRY_FIELDS.every((k) => typeof record[k] === "string");
+}
+
+/** The one validator for every submit path (button, Enter, onSubmit backstop, hook). */
 export function validateFields(values: Inquiry): FieldErrors {
   const errors: FieldErrors = {};
   if (!isValidText(values.first_name)) errors.first_name = FIRST_NAME_ERROR;
