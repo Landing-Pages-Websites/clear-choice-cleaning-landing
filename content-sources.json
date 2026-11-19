@@ -38,7 +38,8 @@
       "verified": true
     },
     {
-      "claim": "Free, no-obligation quotes; every job quoted individually (no published prices)",
+      "claim": "Free, no-obligation quotes; every job quoted individually",
+      "scope_update": "Historical no-published-prices wording is no longer an accurate page inventory. Task 8d4a3dc3-c751-4c16-9eac-3db6df4914a3 (client direction, 2026-11-19) removes the rate_alignment form question and explicitly preserves the existing hero sentence: Professional cleaning rates start at $130. Request a clear, no-obligation cleaning quote. The live CCP pricing restriction remains an inherited conflict outside this surgical edit; no additional pricing claim is authorized.",
       "attribution": "MEGA strategy call 2026-08-07",
       "source_url": "https://clearchoicehomecleaningservices.com/",
       "verified": true
