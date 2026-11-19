@@ -37,17 +37,23 @@ npm run start   # serve the production build
 
 ## Lead form
 
-Fields (all posted as separate snake_case keys): `first_name`, `last_name`, `email`,
-`phone`, `zip_code`, `cleaning_type`, `rate_alignment`. Submission uses a synchronous
-`useRef` latch so a rapid click burst produces exactly one submission. Disqualified
-leads (`rate_alignment = No`) still submit and still see a thank-you — they simply do
-not fire the `qualified_lead` event.
+The six required visitor fields, in order, are `first_name`, `last_name`, `email`,
+`phone`, `zip_code`, and `cleaning_type`, posted as separate snake_case keys.
+Submission uses a synchronous `useRef` latch so a rapid click burst produces exactly
+one submission. Per the client-directed Nov 19, 2026 edit (Atlas task
+8d4a3dc3-c751-4c16-9eac-3db6df4914a3), the former `rate_alignment` question and
+submitted key are removed. Every server-confirmed submission carries `qualified:true`
+and fires the existing `form_submit` and `qualified_lead` signals in their unchanged
+MegaTag-then-dataLayer order. The out-of-area ZIP guard remains unchanged. Downstream
+qualification/routing compatibility is handled separately, not in this LP edit.
 
 ## Content guardrails
 
-All copy is fact-checked in `content-sources.json`. The page carries no years-in-business,
-no licensing/insurance claims, no prices in copy (the sole `$130` lives on the form's
-rate-alignment label), no guarantees, no invented statistics, and no careers content.
+Copy provenance is recorded in `content-sources.json`. The page carries no years-in-business,
+no licensing/insurance claims, no guarantees, no invented statistics, and no careers content.
+The existing hero starting-rate sentence is preserved by the Nov 19 task above; the
+former form question is absent. The live CCP's older pricing restriction remains an
+inherited conflict outside this surgical edit, not permission to add other prices.
 
 ## Deployment
 
