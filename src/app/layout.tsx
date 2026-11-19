@@ -1,21 +1,17 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import Script from "next/script";
+import { preload } from "react-dom";
+import "./fonts.css";
 import "./globals.css";
 
-const display = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-display-active",
-  display: "swap",
-});
-
-const body = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-body-active",
-  display: "swap",
-});
+// Self-hosted fonts (see fonts.css): the classes set --font-display-active /
+// --font-body-active, and the Latin subsets are preloaded as next/font did.
+const FONT_VARIABLE_CLASSES =
+  "plus_jakarta_sans_e3fd564a-module__xYzUtq__variable inter_d5f8f0da-module__ISg8pG__variable";
+const PRELOADED_FONTS = [
+  "/fonts/inter-latin.woff2",
+  "/fonts/plus-jakarta-sans-latin.woff2",
+];
 
 // === MEGA TAG CONFIG === (Clear Choice — client declined Meta, so NO pixelId)
 const SITE_KEY = "o919lqt9cidpi082";
@@ -50,8 +46,12 @@ export default function RootLayout({
 }) {
   const megaTagConfig = `window.MEGA_TAG_CONFIG={siteKey:"${SITE_KEY}",siteId:"${SITE_ID}",gtmId:"${GTM_ID}"};window.API_ENDPOINT="https://optimizer.gomega.ai";window.TRACKING_API_ENDPOINT="https://events-api.gomega.ai";`;
 
+  for (const href of PRELOADED_FONTS) {
+    preload(href, { as: "font", type: "font/woff2", crossOrigin: "" });
+  }
+
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    <html lang="en" className={FONT_VARIABLE_CLASSES}>
       <head>
         <meta name="mega-site-id" content={SITE_ID} />
         <script
