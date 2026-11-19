@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useMegaLeadForm } from "@/hooks/useMegaLeadForm";
 import {
   CTA,
@@ -9,34 +10,31 @@ import {
 } from "@/lib/content";
 import { Icon } from "@/components/icons";
 import { isZipInServiceArea, SERVICE_AREA_MESSAGE } from "@/lib/serviceArea";
+import { EMAIL_ERROR, EMAIL_MAX_LENGTH, EMAIL_PATTERN, PHONE_ERROR, PHONE_PATTERN, formatPhone } from "@/lib/fields";
+import {
+  INQUIRY_FIELDS,
+  ZIP_PATTERN,
+  attempt,
+  buildLead,
+  pushDataLayer,
+  toInquiry,
+  validateFields,
+  type FieldErrors,
+  type Inquiry,
+  type InquiryField,
+} from "@/lib/quoteForm";
 
-declare global {
-  interface Window {
-    dataLayer?: Record<string, unknown>[];
-    MegaTag?: {
-      trackEvent?: (event: string, payload?: Record<string, unknown>) => void;
-    };
-  }
-}
+// Submit-level failure copy. Retryable; the phone renders between the two parts
+// so it can't wrap, and email stays the written fallback.
+const SUBMIT_ERROR_LEAD = "Something went wrong sending your request. Please try again, call";
+const SUBMIT_ERROR_TAIL = ", or email us at michael@clearchoicehomecleaningservices.com.";
 
-// Submit-level failure copy. Retryable, and points to email as the fallback.
-const SUBMIT_ERROR_MESSAGE =
-  "Something went wrong sending your request. Please try again, or email us at michael@clearchoicehomecleaningservices.com.";
+// Safari reports an IME-confirming Enter as keyCode 229 with isComposing false.
+const IME_PROCESS_KEY_CODE = 229;
+// Enter keeps its native meaning on these (newline, picker, activation).
+const NATIVE_ENTER_TAGS = new Set(["TEXTAREA", "SELECT", "BUTTON", "A"]);
 
-// Email pattern also lives on the <input> so native validation enforces it.
-const EMAIL_PATTERN = "[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}";
-const PHONE_PATTERN = "\\(\\d{3}\\) \\d{3}-\\d{4}";
-const ZIP_PATTERN = "\\d{5}";
-
-interface FormState {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  zip_code: string;
-  cleaning_type: string;
-  smsConsent: boolean;
-}
+type FormState = Inquiry & { smsConsent: boolean };
 
 const INITIAL: FormState = {
   first_name: "",
@@ -47,20 +45,6 @@ const INITIAL: FormState = {
   cleaning_type: "",
   smsConsent: false,
 };
-
-const PRIVACY_POLICY_URL = "https://book.clearchoicehomecleaningservices.com/privacy-policy";
-const TERMS_URL = "https://book.clearchoicehomecleaningservices.com/terms-and-conditions";
-
-const SMS_CONSENT_TEXT =
-  "By checking this box, you agree to receive SMS customer-care messages from Clear Choice Home Cleaning Services, including quote follow-ups, appointment confirmations, scheduling reminders, and service updates. Message frequency may vary. Standard Message and Data Rates may apply. Reply STOP to opt out. Reply HELP for help. Consent is not a condition of purchase. Your mobile information will not be sold or shared with third parties for promotional or marketing purposes.";
-
-function formatPhone(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 10);
-  if (!digits) return "";
-  if (digits.length <= 3) return `(${digits}`;
-  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-}
 
 interface FormCardProps {
   idPrefix?: string;
@@ -83,91 +67,96 @@ export function FormCard({
   const [data, setData] = useState<FormState>(INITIAL);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  // Out-of-area ZIP block. Independent of submitError so both can be shown/
+  const [submitFailed, setSubmitFailed] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  // Out-of-area ZIP block. Independent of submitFailed so both can be shown/
   // cleared on their own. Cleared the moment the ZIP is edited.
   const [serviceAreaBlocked, setServiceAreaBlocked] = useState(false);
 
   const formRef = useRef<HTMLFormElement>(null);
   // Synchronous re-entrancy latch — a rapid click burst yields exactly ONE fire.
+  // Stays set after a confirmed lead; only a failure releases it for a retry.
   const inFlightRef = useRef(false);
+  const formId = `${idPrefix}-quote-form`;
 
-  const update = (k: keyof FormState, v: string) =>
+  const update = (k: InquiryField, v: string) => {
     setData((d) => ({ ...d, [k]: v }));
-
-  const fireTracking = (qualified: boolean) => {
-    if (typeof window === "undefined") return;
-    const route = routeSlug || window.location.pathname;
-    const payload = { form_route: route, qualified };
-    // Mega optimizer event FIRST, then the GTM dataLayer signal — for ALL submits.
-    window.MegaTag?.trackEvent?.("form_submit", payload);
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event: "form_submit", ...payload });
-    // Conversion signal only fires for qualified leads.
-    if (qualified) {
-      window.MegaTag?.trackEvent?.("qualified_lead", payload);
-      window.dataLayer.push({ event: "qualified_lead", ...payload });
-    }
+    setFieldErrors((e) => (e[k] ? { ...e, [k]: undefined } : e));
   };
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (inFlightRef.current || submitted) return;
+  const fireTracking = (route: string, qualified: boolean, inquiry: Inquiry) => {
+    const payload = { form_route: route, qualified };
+    // Mega optimizer event FIRST, then the GTM dataLayer signal. Only the MegaTag
+    // form_submit carries the form identity and the six inquiry fields.
+    attempt(() => window.MegaTag?.trackEvent?.("form_submit", { ...payload, elementId: formId, formData: inquiry }));
+    attempt(() => pushDataLayer({ event: "form_submit", ...payload }));
+    // Conversion signal only fires for qualified leads.
+    if (!qualified) return;
+    attempt(() => window.MegaTag?.trackEvent?.("qualified_lead", payload));
+    attempt(() => pushDataLayer({ event: "qualified_lead", ...payload }));
+  };
+
+  const performSubmit = async () => {
+    if (inFlightRef.current) return;
     inFlightRef.current = true;
     setSubmitting(true);
-    setSubmitError(null);
+    setSubmitFailed(false);
     // Every confirmed lead qualifies — the rate screening question was removed.
     const qualified = true;
+    const route = routeSlug || window.location.pathname;
+    const inquiry = toInquiry(data);
+    const lead = buildLead(inquiry, data.smsConsent, qualified, route);
     try {
-      const res = await submit({
-        first_name: data.first_name.trim(),
-        last_name: data.last_name.trim(),
-        email: data.email.trim(),
-        phone: data.phone.replace(/\D/g, ""),
-        zip_code: data.zip_code.trim(),
-        cleaning_type: data.cleaning_type,
-        smsConsent: data.smsConsent,
-        smsConsentText: data.smsConsent
-          ? `${SMS_CONSENT_TEXT} Privacy Policy: ${PRIVACY_POLICY_URL} | Terms & Conditions: ${TERMS_URL}`
-          : "Not provided",
-        qualified,
-        route_slug: routeSlug || (typeof window !== "undefined" ? window.location.pathname : "/"),
-      });
-      // A 2xx with a body that isn't {ok:true} is still a dropped lead. Only
-      // confirmed success fires conversions and shows the thank-you card.
-      if (res?.ok !== true) {
-        throw new Error("Submission not confirmed by server.");
-      }
-      fireTracking(qualified);
-      setSubmitted(true);
+      // A 2xx with a body that isn't {ok:true} is still a dropped lead.
+      const res = await submit(lead);
+      if (res?.ok !== true) throw new Error("Submission not confirmed by server.");
     } catch (err) {
       console.error("Form submission error:", err);
-      // The visitor is fine, but the LEAD would be dropped: surface a retryable
+      // The LEAD would be dropped: keep the form and values, surface a retryable
       // error and fire NO tracking so we never bill a phantom conversion.
-      setSubmitError(SUBMIT_ERROR_MESSAGE);
-    } finally {
       inFlightRef.current = false;
+      setSubmitFailed(true);
       setSubmitting(false);
-    }
-  };
-
-  // Validate FIRST (native), then submit. Button is type="button" so the
-  // optimizer's capture-phase listener never fires on an empty/invalid click.
-  const handleValidateAndSubmit = () => {
-    const form = formRef.current;
-    if (!form) return;
-    if (!form.checkValidity()) {
-      form.reportValidity();
       return;
     }
-    // Service-area guard runs AFTER native validity and BEFORE requestSubmit, so
-    // the blocked path never reaches onSubmit, fireTracking, or the endpoint.
+    // Confirmed: thank-you first, then tracking that can no longer undo it.
+    setSubmitting(false);
+    setSubmitted(true);
+    fireTracking(route, qualified, inquiry);
+  };
+
+  // Validate FIRST, then the ZIP guard, then send directly. The page never
+  // raises a native submit, so the optimizer's capture listener never fires a
+  // form_submit of its own; the only one is fireTracking's, after acceptance.
+  const handleValidateAndSubmit = () => {
+    const errors = validateFields(data);
+    // Commit aria-invalid/aria-describedby before focus so the error is announced.
+    flushSync(() => setFieldErrors(errors));
+    const firstInvalid = INQUIRY_FIELDS.find((k) => errors[k]);
+    if (firstInvalid) {
+      formRef.current?.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)?.focus();
+      return;
+    }
     // A rapid click burst just re-sets the same flag and returns each time.
     if (!isZipInServiceArea(data.zip_code)) {
       setServiceAreaBlocked(true);
       return;
     }
-    form.requestSubmit();
+    void performSubmit();
+  };
+
+  // Enter is stopped on keydown, before the browser dispatches implicit submission.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key !== "Enter" || e.nativeEvent.isComposing || e.keyCode === IME_PROCESS_KEY_CODE) return;
+    if (NATIVE_ENTER_TAGS.has((e.target as HTMLElement).tagName)) return;
+    e.preventDefault();
+    handleValidateAndSubmit();
+  };
+
+  // Backstop for a native submit raised outside the page's own paths: same gate.
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleValidateAndSubmit();
   };
 
   if (submitted) {
@@ -191,7 +180,10 @@ export function FormCard({
   return (
     <form
       ref={formRef}
+      id={formId}
+      noValidate
       onSubmit={onSubmit}
+      onKeyDown={handleKeyDown}
       aria-label="Request a free cleaning quote"
       className="rounded-2xl bg-white border border-[var(--color-border)] shadow-card-lg p-6 md:p-7 space-y-3.5"
     >
@@ -209,6 +201,7 @@ export function FormCard({
           value={data.first_name}
           onChange={(v) => update("first_name", v)}
           disabled={submitting}
+          error={fieldErrors.first_name}
         />
         <Field
           id={`${idPrefix}-last_name`}
@@ -218,6 +211,7 @@ export function FormCard({
           value={data.last_name}
           onChange={(v) => update("last_name", v)}
           disabled={submitting}
+          error={fieldErrors.last_name}
         />
       </div>
 
@@ -226,11 +220,17 @@ export function FormCard({
         name="email"
         label="Email Address"
         type="email"
+        inputMode="email"
         pattern={EMAIL_PATTERN}
+        maxLength={EMAIL_MAX_LENGTH}
         autoComplete="email"
         value={data.email}
         onChange={(v) => update("email", v)}
         disabled={submitting}
+        error={fieldErrors.email}
+        title={EMAIL_ERROR}
+        spellCheck={false}
+        autoCapitalize="none"
       />
 
       <Field
@@ -240,11 +240,13 @@ export function FormCard({
         type="tel"
         inputMode="numeric"
         pattern={PHONE_PATTERN}
-        autoComplete="tel"
+        autoComplete="tel-national"
         placeholder="(555) 555-5555"
         value={data.phone}
         onChange={(v) => update("phone", formatPhone(v))}
         disabled={submitting}
+        error={fieldErrors.phone}
+        title={PHONE_ERROR}
       />
 
       <Field
@@ -263,6 +265,7 @@ export function FormCard({
           update("zip_code", v.replace(/\D/g, "").slice(0, 5));
         }}
         disabled={submitting}
+        error={fieldErrors.zip_code}
         ariaInvalid={serviceAreaBlocked}
         ariaDescribedBy={serviceAreaBlocked ? `${idPrefix}-zip_code-service-area-error` : undefined}
       />
@@ -286,15 +289,17 @@ export function FormCard({
         value={data.cleaning_type}
         onChange={(v) => update("cleaning_type", v)}
         disabled={submitting}
+        error={fieldErrors.cleaning_type}
       />
 
-      {submitError && (
+      {submitFailed && (
         <p
           role="alert"
           aria-live="polite"
           className="lp-field-error !mt-0 rounded-lg border border-[var(--color-error)]/35 bg-[#fef3f2] px-3.5 py-2.5"
         >
-          {submitError}
+          {SUBMIT_ERROR_LEAD} <span className="whitespace-nowrap">{PHONE}</span>
+          {SUBMIT_ERROR_TAIL}
         </p>
       )}
 
@@ -328,13 +333,17 @@ interface FieldProps {
   onChange: (v: string) => void;
   disabled?: boolean;
   type?: string;
-  inputMode?: "numeric" | "text";
+  inputMode?: "numeric" | "text" | "email";
   pattern?: string;
   maxLength?: number;
   placeholder?: string;
   autoComplete?: string;
   ariaInvalid?: boolean;
   ariaDescribedBy?: string;
+  error?: string;
+  title?: string;
+  spellCheck?: boolean;
+  autoCapitalize?: string;
 }
 
 function Field({
@@ -352,7 +361,12 @@ function Field({
   autoComplete,
   ariaInvalid,
   ariaDescribedBy,
+  error,
+  title,
+  spellCheck,
+  autoCapitalize,
 }: FieldProps) {
+  const errorId = `${id}-error`;
   return (
     <div>
       <label htmlFor={id} className="mb-1 block text-[13px] font-semibold text-[var(--color-ink)]">
@@ -370,11 +384,19 @@ function Field({
         autoComplete={autoComplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={FIELD_CLS}
+        className={error ? `${FIELD_CLS} lp-input-error` : FIELD_CLS}
         disabled={disabled}
-        aria-invalid={ariaInvalid}
-        aria-describedby={ariaDescribedBy}
+        aria-invalid={error ? true : ariaInvalid}
+        aria-describedby={error ? errorId : ariaDescribedBy}
+        title={title}
+        spellCheck={spellCheck}
+        autoCapitalize={autoCapitalize}
       />
+      {error && (
+        <p id={errorId} className="lp-field-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -388,6 +410,7 @@ interface SelectFieldProps {
   value: string;
   onChange: (v: string) => void;
   disabled?: boolean;
+  error?: string;
 }
 
 function SelectField({
@@ -399,7 +422,9 @@ function SelectField({
   value,
   onChange,
   disabled,
+  error,
 }: SelectFieldProps) {
+  const errorId = `${id}-error`;
   return (
     <div>
       <label htmlFor={id} className="mb-1 block text-[13px] font-semibold text-[var(--color-ink)]">
@@ -412,8 +437,10 @@ function SelectField({
           required
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`${FIELD_CLS} appearance-none pr-9 ${value ? "" : "text-[var(--color-muted)]"}`}
+          className={`${FIELD_CLS} appearance-none pr-9 ${value ? "" : "text-[var(--color-muted)]"}${error ? " lp-input-error" : ""}`}
           disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
         >
           <option value="" disabled>
             {placeholder}
@@ -437,6 +464,11 @@ function SelectField({
           <path d="m6 9 6 6 6-6" />
         </svg>
       </div>
+      {error && (
+        <p id={errorId} className="lp-field-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

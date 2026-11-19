@@ -47,6 +47,23 @@ and fires the existing `form_submit` and `qualified_lead` signals in their uncha
 MegaTag-then-dataLayer order. The out-of-area ZIP guard remains unchanged. Downstream
 qualification/routing compatibility is handled separately, not in this LP edit.
 
+Form integrity (same task, QA attempt 1 rework; director ruling
+61586b7f-d52a-5030-b620-ffc2d9d44e04, QA 144f929b-32da-44b2-ae4e-c0c0e4931f41):
+
+- `src/lib/fields.ts` is a byte-identical copy of `lp-starter` `src/lib/fields.ts` at
+  `e8e8d9b5c8cd4be6d65818a914c33edecdbeed69` (SHA-256
+  `d25400ba6ee08423f81f50a3dda98d6bd8d110952edfd99f0618799aeeedfe89`). Never edit it here;
+  both the form (`src/lib/quoteForm.ts` `validateFields`) and `useMegaLeadForm.submit()` use it.
+- Both forms are `noValidate` with a `type="button"` submit: validate first, apply the ZIP
+  guard, then send directly. Enter is stopped on `keydown` and routed through the same gate.
+  The page never calls `requestSubmit()` or raises a native submit, so the optimizer's
+  capture listener does not emit its own pre-response `form_submit`.
+- After `ok:true` only: MegaTag `form_submit` (adds `elementId` = `hero-quote-form` /
+  `contact-quote-form` and `formData` = the six normalized fields), dataLayer `form_submit`,
+  MegaTag `qualified_lead`, dataLayer `qualified_lead`. The last three keep only
+  `form_route`/`qualified`. Each call is isolated so a tag error can never undo the
+  thank-you or trigger a resend.
+
 ## Content guardrails
 
 Copy provenance is recorded in `content-sources.json`. The page carries no years-in-business,

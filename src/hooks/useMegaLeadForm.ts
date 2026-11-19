@@ -2,6 +2,14 @@
 
 import { useEffect, useCallback, useRef } from "react";
 import { FORM } from "@/lib/content";
+import {
+  EMAIL_ERROR,
+  PHONE_ERROR,
+  isValidEmail,
+  isValidPhone,
+  normalizeEmail,
+  phoneDigits,
+} from "@/lib/fields";
 
 const CONFIG = {
   CUSTOMER_ID: FORM.customerId,
@@ -129,6 +137,24 @@ const initAttribution = (): Attribution => {
   return attr;
 };
 
+/** Defense in depth: the same pinned src/lib/fields.ts rules the form uses.
+ *  Normalizes email and phone in place, so the lead sends the canonical values. */
+const validateLeadFields = (formData: Record<string, unknown>): void => {
+  if (formData.phone) {
+    if (!isValidPhone(String(formData.phone))) {
+      throw new Error(PHONE_ERROR);
+    }
+    formData.phone = phoneDigits(String(formData.phone));
+  }
+  if (!formData.first_name || !formData.email) {
+    throw new Error("first_name and email are required");
+  }
+  if (!isValidEmail(formData.email)) {
+    throw new Error(EMAIL_ERROR);
+  }
+  formData.email = normalizeEmail(String(formData.email));
+};
+
 interface UseMegaLeadFormReturn {
   submit: (formData: Record<string, unknown>) => Promise<SubmissionResponse>;
   isReady: boolean;
@@ -146,23 +172,7 @@ export const useMegaLeadForm = (): UseMegaLeadFormReturn => {
 
   const submit = useCallback(
     async (formData: Record<string, unknown>): Promise<SubmissionResponse> => {
-      // Defense-in-depth validation. NANP_RE mirrors the UI rule in
-      // FormCard.tsx: area code & exchange each start 2-9 and may not be N11.
-      const NANP_RE = /^[2-9](?!11)\d{2}[2-9](?!11)\d{2}\d{4}$/;
-      if (formData.phone) {
-        const digits = String(formData.phone).replace(/\D/g, "");
-        if (digits.length !== 10) {
-          throw new Error("Phone must be exactly 10 digits");
-        }
-        if (!NANP_RE.test(digits)) {
-          throw new Error("Phone must be a valid 10-digit US number");
-        }
-        formData.phone = digits;
-      }
-      if (!formData.first_name || !formData.email) {
-        throw new Error("first_name and email are required");
-      }
-
+      validateLeadFields(formData);
       const attribution = initAttribution();
 
       const payload = {
