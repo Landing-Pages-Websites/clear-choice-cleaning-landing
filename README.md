@@ -68,9 +68,10 @@ Form integrity (same task, QA attempt 1 rework; director ruling
 
 Copy provenance is recorded in `content-sources.json`. The page carries no years-in-business,
 no licensing/insurance claims, no guarantees, no invented statistics, and no careers content.
-The existing hero starting-rate sentence is preserved by the Nov 19 task above; the
-former form question is absent. The live CCP's older pricing restriction remains an
-inherited conflict outside this surgical edit, not permission to add other prices.
+The hero starting-rate sentence is removed per client direction (Atlas task
+fd3b7eac-f36a-4e19-a42f-465b44ccce08, Nov 19, 2026), superseding only the earlier Nov 19
+task's instruction to retain it. The former form question is absent. The live CCP's older
+pricing restriction remains an inherited conflict outside this surgical edit, not permission to add other prices.
 
 ## Deployment
 
